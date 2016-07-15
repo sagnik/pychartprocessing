@@ -20,7 +20,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-   "edu.psu.sagnik.research" %% "inkscapesvgprocessing" % "0.0.1",
+   "edu.psu.sagnik.research" %% "inkscapesvgprocessing" % "0.0.2",
    //jackson for json
   "org.json4s" %% "json4s-native" % "3.2.11",
   "org.json4s" %% "json4s-jackson" % "3.2.10",
