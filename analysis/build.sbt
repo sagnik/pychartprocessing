@@ -24,6 +24,8 @@ libraryDependencies ++= Seq(
    //jackson for json
   "org.json4s" %% "json4s-native" % "3.2.11",
   "org.json4s" %% "json4s-jackson" % "3.2.10",
+  //commons io for file writing
+  "commons-io" % "commons-io" % "2.4",
   // testing
   "org.scalatest"        %% "scalatest"  %  "2.2.4"
  )

@@ -1,9 +1,12 @@
 package edu.psu.sagnik.research.vlganalysis.impl
 
+import edu.psu.sagnik.research.inkscapesvgprocessing.impl.{GroupExtract, SVGPathBB}
+import edu.psu.sagnik.research.inkscapesvgprocessing.model.{SVGGroup, SVGPath}
+import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.impl.SVGPathfromDString
+import edu.psu.sagnik.research.inkscapesvgprocessing.reader.XMLReader
+import edu.psu.sagnik.research.inkscapesvgprocessing.transformparser.impl.TransformParser
+import edu.psu.sagnik.research.inkscapesvgprocessing.writer.model.PathStyle
 import edu.psu.sagnik.research.vlganalysis.model._
-import edu.psu.sagnik.research.vlganalysis.pathparser.impl.SVGPathfromDString
-import edu.psu.sagnik.research.vlganalysis.reader.XMLReader
-import edu.psu.sagnik.research.vlganalysis.transformparser.impl.TransformParser
 
 /**
  * Created by szr163 on 11/8/15.

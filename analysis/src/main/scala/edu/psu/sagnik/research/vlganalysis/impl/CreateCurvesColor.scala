@@ -2,10 +2,9 @@ package edu.psu.sagnik.research.vlganalysis.impl
 
 import java.io.File
 
+import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.model.{CordPair, MovePath}
+import edu.psu.sagnik.research.inkscapesvgprocessing.reader.XMLReader
 import edu.psu.sagnik.research.vlganalysis.model.{SVGCurve, SVGPathCurve}
-import edu.psu.sagnik.research.vlganalysis.pathparser.impl.SVGPathfromDString
-import edu.psu.sagnik.research.vlganalysis.pathparser.model._
-import edu.psu.sagnik.research.vlganalysis.reader.XMLReader
 import edu.psu.sagnik.research.vlganalysis.writer.SVGWriter
 import org.apache.commons.io.FileUtils
 
@@ -24,14 +23,14 @@ object CreateCurvesColor {
   def apply(loc:String,createImages:Boolean,segementationFunction: (Seq[SVGPathCurve])=>Seq[SVGCurve])={
     val svgPaths=
       if (loc.contains("-sps")) //this SVG has already paths split
-        SVGPathExtract(loc, true)
+        SVGPathExtract(loc, sps=true)
       else
-        SVGPathExtract(loc,false).flatMap(
+        SVGPathExtract(loc,sps=false).flatMap(
           c=>
             SplitPaths.splitPath(
               c.svgPath.pOps.slice(1,c.svgPath.pOps.length),
               c,
-              CordPair(c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.x,c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.y),
+              CordPair(c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x,c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y),
               Seq.empty[SVGPathCurve]
             )
         )
@@ -51,7 +50,7 @@ object CreateCurvesColor {
     val curveGroups=segementationFunction(curvePaths)
 
     if (createImages) {
-      val curveDir = new File(loc.substring(0, loc.length - 4));
+      val curveDir = new File(loc.substring(0, loc.length - 4))
       val dirResult = if (!curveDir.exists) curveDir.mkdir
       else {
         FileUtils.deleteDirectory(curveDir); curveDir.mkdir
@@ -72,7 +71,7 @@ object CreateCurvesColor {
   def apply(loc:String,curvePaths: Seq[SVGPathCurve],createImages:Boolean,segementationFunction: (Seq[SVGPathCurve])=>Seq[SVGCurve])={
     val curveGroups=segementationFunction(curvePaths)
     if (createImages) {
-      val curveDir = new File(loc.substring(0, loc.length - 4));
+      val curveDir = new File(loc.substring(0, loc.length - 4))
       val dirResult = if (!curveDir.exists) curveDir.mkdir
       else {
         FileUtils.deleteDirectory(curveDir); curveDir.mkdir
@@ -94,7 +93,7 @@ object CreateCurvesColor {
       args.head
     else
     "src/test/resources/hassan-Figure-2.svg"
-    CreateCurvesColor(loc,true,colorBasedSegmentation)
+    CreateCurvesColor(loc,createImages=true,colorBasedSegmentation)
 
 
   }

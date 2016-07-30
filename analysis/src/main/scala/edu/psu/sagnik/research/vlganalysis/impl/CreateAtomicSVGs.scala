@@ -18,13 +18,13 @@ object SplitPaths {
       svgPath = SVGPathBB(
         path.svgPath.copy(
           pdContent = "M " +
-            mC.args(0).eP.x +
+            mC.args.head.eP.x +
             "," +
-            mC.args(0).eP.y +
+            mC.args.head.eP.y +
             " L " +
-            lC.args(0).eP.x +
+            lC.args.head.eP.x +
             "," +
-            lC.args(0).eP.y,
+            lC.args.head.eP.y,
           pContent = createSVGPathString(path.pathStyle, path.svgPath.transformOps, mC, lC, path.svgPath.id),
           pOps = Seq(mC, lC)
         )
@@ -32,34 +32,34 @@ object SplitPaths {
       pathStyle = path.pathStyle
     )
 
-  def createSVGPathString(s: PathStyle, tOps: Seq[TransformCommand], mC: Move, lC: Line, id: String): String = {
+  def createSVGPathString(p: PathStyle ,
+                          tOps: Seq[TransformCommand], mC: Move, lC: Line, id: String): String = {
 
-    val fill=s.fill
-    //val fillRule=s.fillRule match {case Some(x)=>"fill-rule:"+x+";" case _ => ""}
-    //val fillOpacity=s.fillOpacity match {case Some(x)=>"fill-opacity:"+x+";" case _ => ""}
-    val stroke=s.stroke
-    val strokeWidth=s.strokeWidth
-    val strokeLinecap=s.strokeLinecap match {case Some(x)=>"stroke-linecap:"+x+";" case _ => ""}
-    val strokeLinejoin=s.strokeLinejoin match {case Some(x)=>"stroke-linejoin:"+x+";" case _ => ""}
-    val strokeMiterlimit=s.strokeMiterlimit match {case Some(x)=>"stroke-miterlimit:"+x+";" case _ => ""}
-    val strokeDasharray=s.strokeDasharray match {case Some(x)=>"stroke-dasharray:"+x+";" case _ => ""}
-    val strokeDashoffset=s.strokeDashoffset match {case Some(x)=>"stroke-dashoffset:"+x+";" case _ => ""}
-    val strokeOpacity=s.strokeOpacity match {case Some(x)=>"stroke-opacity:"+x+";" case _ => ""}
-
-    val styleString =
-      fill+fillRule+fillOpacity+stroke+strokeWidth+strokeLinecap+strokeLinejoin+strokeMiterlimit+strokeDasharray+strokeDashoffset+strokeOpacity
+    val styleString=List(
+      p.fill match {case Some(f) => "fill:"+f; case _ => "fill:none"},
+      p.fillRule match {case Some(f) => "fill-rule:"+f; case _ => "fill-rule:nonzero"},
+      p.fillOpacity match {case Some(f) => "fill-opacity:"+f; case _ => "fill-opacity:1"},
+      p.stroke match {case Some(f) => "stroke:"+f; case _ => "stroke:none"},
+      p.strokeWidth match {case Some(f) => "stroke-width:"+f; case _ => "stroke-width:1"},
+      p.strokeLinecap match {case Some(f) => "stroke-linecap:"+f; case _ => "stroke-linecap:butt"},
+      p.strokeLinejoin match {case Some(f) => "stroke-linejoin:"+f; case _ => "stroke-linejoin:miter"},
+      p.strokeMiterlimit match {case Some(f) => "stroke-miterlimit:"+f; case _ => "stroke-miterlimit:4"},
+      p.strokeDasharray match {case Some(f) => "stroke-dasharray:"+f; case _ => "stroke-dasharray:none"},
+      p.strokeDashoffset match {case Some(f) => "stroke-dashoffset:"+f; case _ => "stroke-dashoffset:0"},
+      p.strokeOpacity match {case Some(f) => "stroke-opacity:"+f; case _ => "stroke-opacity:1"}
+    ).mkString(";")
 
     val transformString = "matrix(1.0,0.0,0.0,0.0,1.0,0.0)" //this is equivalent to no transformation, this will be corrected when
     //we map this with SVGPathBB
 
     val dString = "M " +
-      mC.args(0).eP.x +
+      mC.args.head.eP.x +
       "," +
-      mC.args(0).eP.y +
+      mC.args.head.eP.y +
       " L " +
-      lC.args(0).eP.x +
+      lC.args.head.eP.x +
       "," +
-      lC.args(0).eP.y
+      lC.args.head.eP.y
 
     "<path d=\"" +
       dString +
@@ -101,7 +101,7 @@ object SplitPaths {
           val lastEp = pathElem.getEndPoint[pathElem.type](lep,pathElem.isAbsolute,pathElem.args)
           pathSArr
         }
-      case pathElem :: rest => {
+      case pathElem :: rest =>
         val lastEndPoint = pathElem.getEndPoint[pathElem.type](lep,pathElem.isAbsolute,pathElem.args)
         if (pathElem.isInstanceOf[Line]) {
           if (pathElem.args.isEmpty)
@@ -131,7 +131,7 @@ object SplitPaths {
         else
           splitPath(rest, path, lastEndPoint, pathSArr)
 
-      }
+
     }
 
   def apply(loc:String)={
@@ -141,7 +141,11 @@ object SplitPaths {
       (x.pathStyle.fill match{
         case Some(fill) => true
         case _ => false
-      }) && ("none".equals(x.pathStyle.stroke.getOrElse("none")) || "#ffffff".equals(x.pathStyle.stroke.getOrElse("#ffffff")))
+      }) &&
+        ("none".equals(x.pathStyle.stroke.getOrElse("none")) ||
+          "#ffffff".equals(x.pathStyle.stroke.getOrElse("#ffffff")
+          )
+          )
     }
     )
 
@@ -160,7 +164,7 @@ object TestSplitPaths{
   def main(args: Array[String]):Unit= {
     //val loc="src/test/resources/hassan-Figure-2.svg"
     //val loc="data/10.1.1.164.2702-Figure-2.svg"
-    //val loc="data/10.1.1.100.3286-Figure-9.svg"
+    //val loc="data/10.1.1.100.3286-Figure-9.svg"1
     //val loc="data/10.1.1.104.3077-Figure-1.svg"
     //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
     val loc="src/test/resources/10.1.1.113.223-Figure-10.svg"

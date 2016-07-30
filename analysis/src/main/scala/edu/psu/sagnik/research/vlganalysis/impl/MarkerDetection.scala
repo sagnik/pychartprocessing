@@ -2,9 +2,9 @@ package edu.psu.sagnik.research.vlganalysis.impl
 
 import java.io.File
 
-import edu.psu.sagnik.research.vlganalysis.model.{SVGCurve, Rectangle, SVGPathCurve}
-import edu.psu.sagnik.research.vlganalysis.pathparser.model.{MovePath, CordPair}
-import edu.psu.sagnik.research.vlganalysis.reader.XMLReader
+import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.model.{CordPair, MovePath}
+import edu.psu.sagnik.research.inkscapesvgprocessing.reader.XMLReader
+import edu.psu.sagnik.research.vlganalysis.model.{SVGCurve, SVGPathCurve}
 import edu.psu.sagnik.research.vlganalysis.writer.SVGWriter
 import org.apache.commons.io.FileUtils
 
@@ -124,7 +124,7 @@ object MarkerDetection {
       )
 
 
-    val markerBasedCurves=markerCurveDictionary.map{case (x,y) => if (y.nonEmpty) Some(SVGCurve(x,y)) else None}.flatten.toSeq
+    val markerBasedCurves=markerCurveDictionary.flatMap{case (x,y) => if (y.nonEmpty) Some(SVGCurve(x,y)) else None}
     //println(markerBasedCurves.length)
 
     val restCurves = CreateCurvesColor.featureBasedSegmentation(curvePaths diff (markerCurveDictionary.getOrElse("square", List.empty[SVGPathCurve]) ++
@@ -147,9 +147,9 @@ object MarkerDetection {
   def apply(loc:String,createImages:Boolean):Unit={
     val svgPaths=
       if (loc.contains("-sps")) //this SVG has already paths split
-        SVGPathExtract(loc, true)
+        SVGPathExtract(loc, sps=true)
       else
-        SVGPathExtract(loc,false).flatMap(
+        SVGPathExtract(loc,sps=false).flatMap(
           c=>
             SplitPaths.splitPath(
               c.svgPath.pOps.slice(1,c.svgPath.pOps.length),
@@ -174,14 +174,15 @@ object MarkerDetection {
 
     val curveGroups=MarkerDetection(curvePaths,noCurveIfMarkerExists=true) //MAKE THIS TRUE IF YOU WANT TO GET JUST THE MARKERS
     if (createImages) {
-      val curveDir = new File(loc.substring(0, loc.length - 4));
+      val curveDir = new File(loc.substring(0, loc.length - 4))
       val dirResult = if (!curveDir.exists) curveDir.mkdir
       else {
         FileUtils.deleteDirectory(curveDir); curveDir.mkdir
       }
 
       if (dirResult) {
-        curveGroups foreach { x => println(s"Creating SVG for curve ${x.id}"); SVGWriter(x.paths, x.id, loc, curveDir.getAbsolutePath) }
+        curveGroups foreach { x => println(s"Creating SVG for curve ${x.id}")
+          SVGWriter(x.paths, x.id, loc, curveDir.getAbsolutePath) }
       }
       else {
         println("Couldn't create directory to store Curve SVG files, exiting.")
@@ -210,7 +211,7 @@ object MarkerDetection {
     //"src/test/resources/10.1.1.160.6544-Figure-4.svg"
     //  "src/test/resources/10.1.1.152.1889-Figure-4.svg"
 
-    MarkerDetection(loc,true)
+    MarkerDetection(loc,createImages=true)
 
   }
 

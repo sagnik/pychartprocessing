@@ -1,9 +1,9 @@
 package edu.psu.sagnik.research.vlganalysis.impl
 
-import edu.psu.sagnik.research.vlganalysis.model.{Rectangle, SVGPathCurve}
-import edu.psu.sagnik.research.vlganalysis.pathparser.impl.SVGPathfromDString
-import edu.psu.sagnik.research.vlganalysis.pathparser.model.{Move, Line, MovePath, CordPair}
-import edu.psu.sagnik.research.vlganalysis.reader.XMLReader
+import edu.psu.sagnik.research.inkscapesvgprocessing.model.Rectangle
+import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.model.{CordPair, Line, Move, MovePath}
+import edu.psu.sagnik.research.inkscapesvgprocessing.reader.XMLReader
+import edu.psu.sagnik.research.vlganalysis.model.{RectExtensions, SVGPathCurve}
 import edu.psu.sagnik.research.vlganalysis.writer.SVGWriter
 
 /**
@@ -58,7 +58,7 @@ object SeparateAxesGridTickPaths {
 
   def pathOverlap(a:SVGPathCurve,b:SVGPathCurve):Boolean={
     (a.svgPath.bb,b.svgPath.bb) match{
-      case (Some(aBB),Some(bBB))=>Rectangle.rectTouches(Rectangle(aBB.x1-1f,aBB.y1-1f,aBB.x2+1,aBB.y2+1f),bBB)
+      case (Some(aBB),Some(bBB))=>RectExtensions.rectTouchesCorners(Rectangle(aBB.x1-1f,aBB.y1-1f,aBB.x2+1,aBB.y2+1f),bBB)
       case _ => false
     }
   }
@@ -103,7 +103,8 @@ object SeparateAxesGridTickPaths {
       (x.pathStyle.fill match{
         case Some(fill) => true
         case _ => false
-      }) && ("none".equals(x.pathStyle.stroke.getOrElse("none")) || "#ffffff".equals(x.pathStyle.stroke.getOrElse("#ffffff")))
+      }) && ("none".equals(x.pathStyle.stroke.getOrElse("none")) ||
+        "#ffffff".equals(x.pathStyle.stroke.getOrElse("#ffffff")))
     }
     )
 

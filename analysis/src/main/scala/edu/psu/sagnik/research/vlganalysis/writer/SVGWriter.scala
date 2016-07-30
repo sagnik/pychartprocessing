@@ -1,7 +1,7 @@
 package edu.psu.sagnik.research.vlganalysis.writer
 
+import edu.psu.sagnik.research.inkscapesvgprocessing.reader.XMLReader
 import edu.psu.sagnik.research.vlganalysis.model.SVGPathCurve
-import edu.psu.sagnik.research.vlganalysis.reader.XMLReader
 
 import scala.reflect.io.File
 

@@ -1,6 +1,7 @@
 package edu.psu.sagnik.research.vlganalysis.impl
 
-import edu.psu.sagnik.research.vlganalysis.model.{Rectangle, SVGPathCurve}
+import edu.psu.sagnik.research.inkscapesvgprocessing.model.Rectangle
+import edu.psu.sagnik.research.vlganalysis.model.SVGPathCurve
 
 /**
  * Created by szr163 on 3/11/16.
