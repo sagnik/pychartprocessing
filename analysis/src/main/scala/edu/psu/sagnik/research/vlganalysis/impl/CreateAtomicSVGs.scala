@@ -158,6 +158,37 @@ object SplitPaths {
       ))
     SVGWriter(spPath,loc,"sps")
   }
+
+  def apply(loc:String,fromPython:Boolean=true)={
+    val cS= PyChartSVGPathExtract(loc)
+    val graphPaths=cS.filterNot(p => p.svgPath.groups.exists(_.id.contains("text")))
+    //cS.foreach(c=>println(c.svgPath.id+" : "+c.svgPath.groups.map(_.id))
+
+    val (fillExists,noFill)=graphPaths.partition(x=> {
+      (x.pathStyle.fill match{
+        case Some(fill) => true
+        case _ => false
+      }) &&
+        ("none".equals(x.pathStyle.stroke.getOrElse("none")) ||
+          "#ffffff".equals(x.pathStyle.stroke.getOrElse("#ffffff")
+          )
+          )
+    }
+    )
+
+
+
+    val spPath=noFill.flatMap(c =>
+      SplitPaths.splitPath(
+        c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
+        c,
+        CordPair(c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.x, c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.y),
+        Seq.empty[SVGPathCurve]
+      ))
+    SVGWriter(spPath,loc,"sps")
+
+  }
+
 }
 
 object TestSplitPaths{
@@ -168,7 +199,8 @@ object TestSplitPaths{
     //val loc="data/10.1.1.104.3077-Figure-1.svg"
     //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
     val loc="src/test/resources/10.1.1.113.223-Figure-10.svg"
-    SplitPaths(loc)
+    val pyLoc="../linegraphproducer/data/test.svg"
+    SplitPaths(pyLoc,fromPython = true)
   }
 
 }

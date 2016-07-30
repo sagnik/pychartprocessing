@@ -18,7 +18,11 @@ class Combination[A] {
         rejectFunc
       ).flatMap(x => for (l <- ls if !(x.contains(l) || rejectFunc(l,x))) yield x :+ l ).map(x=>x.toSet).distinct.map(y=>y.toList)
 
-  def combinationTL[A](r: Int, startingR: Int, ls: List[A], rejectFunc:(A,List[A])=>Boolean, combs:List[List[A]]): List[List[A]] =
+  def combinationTL[A](r: Int, startingR: Int,
+                       ls: List[A],
+                       rejectFunc:(A,List[A])=>Boolean,
+                       combs:List[List[A]]):
+  List[List[A]] =
     if (r == startingR) combs
     else
       combinationTL(
