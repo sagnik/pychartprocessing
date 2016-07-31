@@ -137,6 +137,7 @@ object SplitPaths {
   def apply(loc:String)={
     val cS= SVGPathExtract(loc,false)
     //Seq(svgpathCurves(0)).foreach(x=>println(x.svgPath.id,x.svgPath.pdContent,x.svgPath.pOps))
+
     val (fillExists,noFill)=cS.partition(x=> {
       (x.pathStyle.fill match{
         case Some(fill) => true
@@ -161,7 +162,11 @@ object SplitPaths {
 
   def apply(loc:String,fromPython:Boolean=true)={
     val cS= PyChartSVGPathExtract(loc)
+
+    cS.foreach(x=>println(x.svgPath.id+" : "+x.svgPath.groups.map(_.id)+" : "+x.svgPath.pContent))
+
     val graphPaths=cS.filterNot(p => p.svgPath.groups.exists(_.id.contains("text")))
+    println(graphPaths.length)
     //cS.foreach(c=>println(c.svgPath.id+" : "+c.svgPath.groups.map(_.id))
 
     val (fillExists,noFill)=graphPaths.partition(x=> {

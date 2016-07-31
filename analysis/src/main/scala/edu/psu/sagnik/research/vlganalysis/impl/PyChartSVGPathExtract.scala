@@ -7,7 +7,7 @@ import edu.psu.sagnik.research.inkscapesvgprocessing.reader.XMLReader
 import edu.psu.sagnik.research.inkscapesvgprocessing.transformparser.impl.TransformParser
 import edu.psu.sagnik.research.vlganalysis.model.{SVGPathCurve, SVGPathXML}
 
-import scala.xml.NodeSeq
+import scala.xml.{Node, NodeSeq}
 
 /**
   * Created by sagnik on 7/29/16.
@@ -16,63 +16,27 @@ object PyChartSVGPathExtract {
 
   def apply(fileLoc:String)=getPaths(XMLReader(fileLoc),GroupExtract.apply(fileLoc))
 
-  def getPaths(xmlContent:scala.xml.Elem, svgGroups:Seq[SVGGroup]):Seq[SVGPathCurve]= {
+  def getPaths(xmlContent:scala.xml.Elem, svgGroups:Seq[SVGGroup]):Seq[SVGPathCurve]=
 
-    val topLevelPaths = xmlContent \ "path"
-    //topLevelPaths.foreach(x=>println(s"[top level path]: ${x}"))
-    val gIdMap=getGroupParents((xmlContent \ "g"),(xmlContent \\ "g").map(a=>a \@ "id").groupBy(x=>x).map{case (k,v) => (k,Seq.empty[String]) })
-
-    //gIdMap.foreach(x=>println(s"[group number]: ${x._1} [parent group]: ${x._2}"))
-
-    val lowerLevelPaths=iterateOverGroups(xmlContent \ "g",Seq.empty[PathGroups],gIdMap)
-
-    var groupIdIncrement=0
-    val topLevelSVGPaths=
-      topLevelPaths.map(x =>
-        SVGPath(
-          x.attribute("id") match {
-            case Some(idExists) => idExists.text
-            case _ =>
-              groupIdIncrement+=1
-              "noID"+groupIdIncrement.toString
-          },
-          pdContent = x.attribute("d") match {case Some(con)=>con.text case _ => ""},
-          pContent=x.toString(),
-          pOps = SVGPathfromDString.getPathCommands(x.attribute("d") match {case Some(con)=>con.text case _ => ""}),
-          groups = Seq.empty[SVGGroup],
-          transformOps=TransformParser(x \@ "transform"),
-          bb=None
+   pathGroups(
+      xmlContent \ "g",
+      Map.empty[SVGPath,Seq[SVGGroup]],
+      groupNoIdCounter = 0,
+      pathNoIdCounter = 0,
+      Map.empty[String,String]
+    )
+     .map{
+      case (path,groups)=>
+        path.copy(
+          groups=groups
         )
-      )
-
-    val lowerLevelSVGpaths=
-      lowerLevelPaths.map(x =>
-        SVGPath(
-          x.path.attribute("id") match {
-            case Some(idExists) => idExists.text
-            case _ =>
-              groupIdIncrement+=1
-              "noID"+groupIdIncrement.toString
-          },
-          pdContent = x.path.attribute("d") match {
-            case Some(con) => con.text
-            case _ => ""
-          },
-          pContent = x.path.toString(),
-          pOps = SVGPathfromDString.getPathCommands(x.path.attribute("d") match {case Some(con)=>con.text case _ => ""}),
-          groups = svgGroups.filter(a=>x.gIds.contains(a.id)),
-          transformOps=TransformParser(x.path \@ "transform"),
-          bb=None
+    }.map(
+      svgPath=>
+        SVGPathXML(
+          svgPath = svgPath,
+          styleXML = scala.xml.XML.loadString(svgPath.pContent) \ "style"
         )
-      )
-    (topLevelSVGPaths ++ lowerLevelSVGpaths) //TODO: this is pretty stupid. Change ASAP.
-      .map(
-        svgPath=>
-          SVGPathXML(
-            svgPath = svgPath,
-            styleXML = scala.xml.XML.loadString(svgPath.pContent) \ "style"
-          )
-      )
+    )
       .map(
         svgXMlPath =>
           svgXMlPath.copy(svgPath=SVGPathBB(svgXMlPath.svgPath)
@@ -82,40 +46,106 @@ object PyChartSVGPathExtract {
         x=>
           SVGPathExtract.getPathStyleObject(x)
       )
-  }
-
-  def iterateOverGroups(tlGs:NodeSeq,pathGIDs:Seq[PathGroups],gIdMap:Map[String,Seq[String]]):Seq[PathGroups]=
-    if (tlGs.length==0) pathGIDs
-    else{
-      val newGId=tlGs.head \@ "id" //TODO: What happens if the group doesn't have an ID?
-      val parentGids=gIdMap.get(newGId) match{
-          case(Some(a))=> a
-          case None => Seq.empty[String]
-        }
-
-      val thisTLGpathGIDs=pathGIDs ++ (tlGs.head \ "path").map(x=>PathGroups(x,newGId +: parentGids))
-      iterateOverGroups(tlGs.tail ++ tlGs.head \"g",thisTLGpathGIDs, gIdMap)
-
-    }
+      .toSeq
 
 
-  def getGroupParents(tlGs: NodeSeq, parentMap:Map[String,Seq[String]]):Map[String,Seq[String]]=
+
+  def pathGroups(tlGs: NodeSeq,
+                 parentMap:Map[SVGPath,
+                   Seq[SVGGroup]],
+                 groupNoIdCounter:Int,
+                 pathNoIdCounter:Int,
+                 dStringMap:Map[String,String]
+                ):Map[SVGPath,Seq[SVGGroup]]=
+
     if (tlGs.isEmpty) parentMap
     else {
-      val newGId = tlGs.head \@ "id" //TODO: What happens if the group doesn't have an ID?
-      val newtlGs = tlGs.head \ "g"
-      val newParentMap = parentMap ++ newtlGs.map(x => (x \@ "id", newGId)).toMap.map {
-        case (k, v) => (k,
-          parentMap.get(v) match {
-            case Some(a) => v +: a
-            case _ => List(v)
-          }
-          )
+      var gCounter=groupNoIdCounter
+      var pCounter=pathNoIdCounter
+      var pathsMappedbyDString=dStringMap
+
+      val newGId = tlGs.head.attribute("id") match {
+        case Some(idExists) => idExists.text
+        case _ =>
+          gCounter+=1
+          "noID"+gCounter.toString
       }
-      getGroupParents(tlGs.tail ++ newtlGs, newParentMap)
+      val newtlGs = tlGs.head \ "g"
+      val parentMapThistlgS =
+        newtlGs.map(x => {
+          val childId=
+            x.attribute("id") match {
+              case Some(idExists) => idExists.text
+              case _ =>
+                gCounter+=1
+                "noID" + gCounter.toString
+            }
+
+          val group=
+            SVGGroup(
+              id= childId,
+              gtContent = x \@ "transform",
+              gContent= x.toString,
+              transformOps = TransformParser(x \@ "transform")
+            )
+
+          val paths=
+            (x \\ "path").map(
+              pathNode=>
+                SVGPath(
+                  pathNode.attribute("id") match {
+                    case Some(idExists) =>
+                      val pdContent=pathNode.attribute("d") match {case Some(con)=>con.text case _ => ""}
+                      pathsMappedbyDString += (pdContent -> idExists.text)
+                      idExists.text
+                    case _ =>
+                      val pdContent=pathNode.attribute("d") match {case Some(con)=>con.text case _ => ""}
+                      val pathCounter=
+                        dStringMap.get(pdContent) match{
+                          case Some(existingPCounter) =>  existingPCounter //this path was seen before
+                          case _ =>
+                            pCounter+=1
+                            pCounter.toString
+                        }
+                      pathsMappedbyDString += (pdContent -> pCounter.toString)
+                      "noID"+pathCounter
+                  },
+                  pdContent = pathNode.attribute("d") match {case Some(con)=>con.text case _ => ""},
+                  pContent=pathNode.toString(),
+                  pOps = SVGPathfromDString.getPathCommands(pathNode.attribute("d") match {case Some(con)=>con.text case _ => ""}),
+                  groups=List.empty[SVGGroup],
+                  transformOps = TransformParser(pathNode \@ "transform"),
+                  bb=None
+                )
+            )
+
+          val combinedMap=
+            combineMaps(
+              parentMap,
+              paths.map(x=>(x,Seq(group))).toMap //this is grouping by id, which is weird.
+            )
+
+          combinedMap
+        }
+        )
+
+
+      val newParentMap= parentMapThistlgS.foldLeft(parentMap){case (accum,toBeMerged) => combineMaps(accum,toBeMerged)}
+
+      pathGroups(tlGs.tail ++ newtlGs, newParentMap,gCounter,pCounter,pathsMappedbyDString)
     }
 
-  //def styleFromPathString
+  lazy val combineMaps = (accum:Map[SVGPath,Seq[SVGGroup]],toBeMerged:Map[SVGPath,Seq[SVGGroup]]) =>
+  {
+    val comb=accum.toList ++ toBeMerged.toList
+    comb.groupBy(_._1).map{case (k,v) => (k -> v.map(_._2).flatten.distinct) }
 
+  }
 
 }
+
+
+//def styleFromPathString
+
+
+
