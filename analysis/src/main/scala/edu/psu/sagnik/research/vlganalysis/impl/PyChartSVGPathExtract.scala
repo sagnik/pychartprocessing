@@ -49,7 +49,7 @@ object PyChartSVGPathExtract {
       .toSeq
 
 
-
+ //while creating svg groups, include style elements.
   def pathGroups(tlGs: NodeSeq,
                  parentMap:Map[SVGPath,
                    Seq[SVGGroup]],
