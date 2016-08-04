@@ -169,7 +169,7 @@ object SplitPaths {
 
     //cS.foreach(x=>println(x.svgPath.id+" : "+x.svgPath.groups.map(_.id)))
 
-    val graphPaths=cS.filter(p => p.svgPath.groups.exists(_.id.contains("line2d_1"))) //TODO: hack, to change
+    val graphPaths=cS.filter(p => p.svgPath.groups.exists(_.id.contains("line2d"))) //TODO: hack, to change
     println(graphPaths.length)
     //cS.foreach(c=>println(c.svgPath.id+" : "+c.svgPath.groups.map(_.id))
 
@@ -208,7 +208,7 @@ object TestSplitPaths{
     //val loc="data/10.1.1.104.3077-Figure-1.svg"
     //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
     val loc="src/test/resources/10.1.1.113.223-Figure-10.svg"
-    val pyLoc="../linegraphproducer/data/test.svg"
+    val pyLoc="../linegraphproducer/data/sine.svg"
     SplitPaths(pyLoc,fromPython = true)
   }
 
