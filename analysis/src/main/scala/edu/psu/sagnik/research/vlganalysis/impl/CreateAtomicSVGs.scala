@@ -49,7 +49,8 @@ object SplitPaths {
       p.strokeOpacity match {case Some(f) => "stroke-opacity:"+f; case _ => "stroke-opacity:1"}
     ).mkString(";")
 
-    val transformString = "matrix(1.0,0.0,0.0,0.0,1.0,0.0)" //this is equivalent to no transformation, this will be corrected when
+    val transformString = "matrix(1.0,0.0,0.0,1.0,0.0,0.0)"
+    //this is equivalent to no transformation, this will be corrected when
     //we map this with SVGPathBB
 
     val dString = "M " +
@@ -119,7 +120,10 @@ object SplitPaths {
             )
           }
           else {
-            val splitPaths = pathElem.args.map(x => Line(isAbsolute = pathElem.isAbsolute, args = Seq(LinePath(x.asInstanceOf[LinePath].eP))))
+            val splitPaths = pathElem.args.map(
+              x => 
+                Line(isAbsolute = pathElem.isAbsolute, args = Seq(LinePath(x.asInstanceOf[LinePath].eP)))
+            )
             splitPath(
               splitPaths ++ rest,
               path,
@@ -163,9 +167,9 @@ object SplitPaths {
   def apply(loc:String,fromPython:Boolean=true)={
     val cS= PyChartSVGPathExtract(loc)
 
-    cS.foreach(x=>println(x.svgPath.id+" : "+x.svgPath.groups.map(_.id)+" : "+x.svgPath.pContent))
+    //cS.foreach(x=>println(x.svgPath.id+" : "+x.svgPath.groups.map(_.id)))
 
-    val graphPaths=cS.filterNot(p => p.svgPath.groups.exists(_.id.contains("text")))
+    val graphPaths=cS.filter(p => p.svgPath.groups.exists(_.id.contains("line2d_1"))) //TODO: hack, to change
     println(graphPaths.length)
     //cS.foreach(c=>println(c.svgPath.id+" : "+c.svgPath.groups.map(_.id))
 

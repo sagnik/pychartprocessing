@@ -17,6 +17,8 @@ import scala.xml.NodeSeq
 
 case class SVGPathXML(svgPath:SVGPath,styleXML:NodeSeq)
 //TODO: We need to add a sequence of "(x,y) points" that is painted by this curve.
+
 case class SVGPathCurve(svgPath:SVGPath,pathStyle:PathStyle)
 
 case class SVGCurve(id:String,paths:Seq[SVGPathCurve])
+

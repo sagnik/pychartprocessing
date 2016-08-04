@@ -26,13 +26,12 @@ object SVGWriter {
     val svgString = curvePaths.map(x => x.svgPath.pContent).foldLeft("")((a, b) => a + "\n" + b)
 
     val svgEnd = "\n</svg>"
-
     File(curveSVGLoc).writeAll(svgStart + svgString + svgEnd)
   }
 
   def apply(curvePaths:Seq[SVGPathCurve],orgSVGLoc:String,ext:String):Unit= {
-    val curveSVGLoc = orgSVGLoc.substring(0, orgSVGLoc.length - 4)+ "-"+ext+".svg"
-    println(curveSVGLoc)
+    val curveSVGLoc = orgSVGLoc.dropRight(4)+ "-"+ext+".svg"
+    println(s"writing atomic SVG to $curveSVGLoc")
     //TODO: Possible exception
     val height = (XMLReader(orgSVGLoc) \\ "svg")(0) \@ "height"
     val width = (XMLReader(orgSVGLoc) \\ "svg")(0) \@ "width"
