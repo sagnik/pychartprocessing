@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 
 def main():
+    marker1={'id':'o','color': ''}
     t = arange(0.0, 1.0, 0.01)
     plt.plot(t,sin(2*pi*t))
     plt.plot(t,sin(-2*pi*t))

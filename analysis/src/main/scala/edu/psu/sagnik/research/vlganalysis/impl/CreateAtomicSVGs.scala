@@ -208,7 +208,7 @@ object TestSplitPaths{
     //val loc="data/10.1.1.104.3077-Figure-1.svg"
     //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
     val loc="src/test/resources/10.1.1.113.223-Figure-10.svg"
-    val pyLoc="../linegraphproducer/data/sine.svg"
+    val pyLoc="../linegraphproducer/data/sine1.svg"
     SplitPaths(pyLoc,fromPython = true)
   }
 
