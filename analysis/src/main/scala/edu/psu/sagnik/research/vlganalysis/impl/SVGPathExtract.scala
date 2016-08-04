@@ -8,6 +8,8 @@ import edu.psu.sagnik.research.inkscapesvgprocessing.transformparser.impl.Transf
 import edu.psu.sagnik.research.inkscapesvgprocessing.writer.model.PathStyle
 import edu.psu.sagnik.research.vlganalysis.model._
 
+import scala.xml.NodeSeq
+
 /**
  * Created by szr163 on 11/8/15.
  */
@@ -78,6 +80,8 @@ object SVGPathExtract {
 
 
   def getPathStyleObject(x:SVGPathXML):SVGPathCurve={
+    if (x.svgPath.groups.count(y=>y.id.contains("line2d_1"))==1)
+      println(s"here ${x.styleXML.text}")
     SVGPathCurve(
       svgPath=x.svgPath,
       pathStyle=PathStyle(
@@ -95,7 +99,23 @@ object SVGPathExtract {
       )
     )
   }
-  def returnPattern(pC:String,s:String):Option[String]=
-    if (pC.split(";").filter(x => x.contains(s)).length == 0) None
+
+  def getPathStyleObject(styleXML:NodeSeq):PathStyle={
+      PathStyle(
+        fill= returnPattern(styleXML\@"style","fill"),
+        fillRule=returnPattern(styleXML\@"style","fill-rule"),
+        fillOpacity= returnPattern(styleXML\@"style","fill-opacity"),
+        stroke= returnPattern(styleXML\@"style","stroke"),
+        strokeWidth = returnPattern(styleXML\@"style","stroke-width"),
+        strokeLinecap = returnPattern(styleXML\@"style","stroke-linecap"),
+        strokeLinejoin = returnPattern(styleXML\@"style","stroke-linejoin"),
+        strokeMiterlimit = returnPattern(styleXML\@"style","stroke-miterlimit"),
+        strokeDasharray = returnPattern(styleXML\@"style","stroke-dasharray"),
+        strokeDashoffset = returnPattern(styleXML\@"style","stroke-dashoffset"),
+        strokeOpacity = returnPattern(styleXML\@"style","stroke-opacity")
+      )
+  }
+  val returnPattern= (pC:String,s:String) =>
+    if (pC.split(";").count(x => x.contains(s)) == 0) None
     else Some(pC.split(";").filter(x => x.contains(s))(0).split(":")(1))
 }

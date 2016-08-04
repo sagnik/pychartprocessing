@@ -5,6 +5,7 @@ import edu.psu.sagnik.research.inkscapesvgprocessing.model.{PathGroups, SVGGroup
 import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.impl.SVGPathfromDString
 import edu.psu.sagnik.research.inkscapesvgprocessing.reader.XMLReader
 import edu.psu.sagnik.research.inkscapesvgprocessing.transformparser.impl.TransformParser
+import edu.psu.sagnik.research.inkscapesvgprocessing.writer.model.PathStyle
 import edu.psu.sagnik.research.vlganalysis.model.{SVGPathCurve, SVGPathXML}
 
 import scala.xml.{Node, NodeSeq}
@@ -18,34 +19,30 @@ object PyChartSVGPathExtract {
 
   def getPaths(xmlContent:scala.xml.Elem, svgGroups:Seq[SVGGroup]):Seq[SVGPathCurve]=
 
-   pathGroups(
+    pathGroups(
       xmlContent \ "g",
       Map.empty[SVGPath,Seq[SVGGroup]],
       groupNoIdCounter = 0,
       pathNoIdCounter = 0,
       Map.empty[String,String]
     )
-     .map{
-      case (path,groups)=>
-        path.copy(
-          groups=groups
-        )
-    }.map(
-      svgPath=>
-        SVGPathXML(
-          svgPath = svgPath,
-          styleXML = scala.xml.XML.loadString(svgPath.pContent) \ "style"
-        )
-    )
-      .map(
-        svgXMlPath =>
-          svgXMlPath.copy(svgPath=SVGPathBB(svgXMlPath.svgPath)
+      .map{
+        case (path,groups)=>
+          path.copy(
+            groups=groups
           )
-      )
-      .map(
-        x=>
-          SVGPathExtract.getPathStyleObject(x)
-      )
+      }
+      .map {
+        svgPath =>
+          SVGPathBB(svgPath)
+      }
+      .map {
+        svgPath =>
+          SVGPathCurve(
+            svgPath = svgPath,
+            pathStyle = SVGPathExtract.getPathStyleObject(xml.XML.loadString(svgPath.pContent))
+          )
+      }
       .toSeq
 
 

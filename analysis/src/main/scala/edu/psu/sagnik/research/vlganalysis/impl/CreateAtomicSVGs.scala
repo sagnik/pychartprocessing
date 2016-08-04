@@ -121,7 +121,7 @@ object SplitPaths {
           }
           else {
             val splitPaths = pathElem.args.map(
-              x => 
+              x =>
                 Line(isAbsolute = pathElem.isAbsolute, args = Seq(LinePath(x.asInstanceOf[LinePath].eP)))
             )
             splitPath(
