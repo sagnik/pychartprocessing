@@ -9,7 +9,7 @@ import scala.reflect.io.File
  * Created by sagnik on 3/6/16.
  */
 object SVGWriter {
-  def apply(curvePaths:Seq[SVGPathCurve],curveNo:String,orgSVGLoc:String,curveDir:String):Unit= {
+  def apply(curvePaths: Seq[SVGPathCurve], curveNo: String, orgSVGLoc: String, curveDir: String): Unit = {
     val curveSVGLoc = curveDir + "/" + orgSVGLoc.substring(0, orgSVGLoc.length - 4).split("/").last + "-Curve-" + curveNo + ".svg"
 
     //TODO: Possible exception
@@ -29,8 +29,8 @@ object SVGWriter {
     File(curveSVGLoc).writeAll(svgStart + svgString + svgEnd)
   }
 
-  def apply(curvePaths:Seq[SVGPathCurve],orgSVGLoc:String,ext:String):Unit= {
-    val curveSVGLoc = orgSVGLoc.dropRight(4)+ "-"+ext+".svg"
+  def apply(curvePaths: Seq[SVGPathCurve], orgSVGLoc: String, ext: String): Unit = {
+    val curveSVGLoc = orgSVGLoc.dropRight(4) + "-" + ext + ".svg"
     println(s"writing atomic SVG to $curveSVGLoc")
     //TODO: Possible exception
     val height = (XMLReader(orgSVGLoc) \\ "svg")(0) \@ "height"
