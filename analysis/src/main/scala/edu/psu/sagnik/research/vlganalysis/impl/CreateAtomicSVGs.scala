@@ -160,7 +160,7 @@ object SplitPaths {
   def apply(loc: String, colors: Seq[String], fromPython: Boolean = true) = {
     val cS = PyChartSVGPathExtract(loc)
     val graphPaths = cS.filter(p =>
-      colors.exists(color => p.pathStyle.stroke.getOrElse("#fffffff").equalsIgnoreCase(color)))
+      colors.exists(color => p.pathStyle.stroke.getOrElse("#ffffff").equalsIgnoreCase(color)))
     println(graphPaths.length)
     val (fillExists, noFill) = graphPaths.partition(x => {
       (x.pathStyle.fill match {
