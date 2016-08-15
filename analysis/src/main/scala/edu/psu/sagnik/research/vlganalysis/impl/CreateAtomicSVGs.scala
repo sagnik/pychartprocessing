@@ -164,15 +164,12 @@ object SplitPaths {
     SVGWriter(spPath,loc,"sps")
   }
 
-  def apply(loc:String,fromPython:Boolean=true)={
+  def apply(loc:String,colors:Seq[String],fromPython:Boolean=true)={
     val cS= PyChartSVGPathExtract(loc)
-
-    //cS.foreach(x=>println(x.svgPath.id+" : "+x.svgPath.groups.map(_.id)))
-
-    val graphPaths=cS.filter(p => p.svgPath.groups.exists(_.id.contains("line2d"))) //TODO: hack, to change
+    val graphPaths=cS.filter(p =>
+      colors.exists(color=>p.pathStyle.stroke.getOrElse("#fffffff").equalsIgnoreCase(color))
+    )
     println(graphPaths.length)
-    //cS.foreach(c=>println(c.svgPath.id+" : "+c.svgPath.groups.map(_.id))
-
     val (fillExists,noFill)=graphPaths.partition(x=> {
       (x.pathStyle.fill match{
         case Some(fill) => true
@@ -208,8 +205,10 @@ object TestSplitPaths{
     //val loc="data/10.1.1.104.3077-Figure-1.svg"
     //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
     val loc="src/test/resources/10.1.1.113.223-Figure-10.svg"
-    val pyLoc="../linegraphproducer/data/sine1.svg"
-    SplitPaths(pyLoc,fromPython = true)
+    //val pyLoc="../linegraphproducer/data/1/1-cube-plus-indigo.svg"
+    val pyLoc="../linegraphproducer/data/1/1.svg"
+    val colorsMap=Map("indigo"->"#4B0082","gold"->"#FFD700")
+    SplitPaths(pyLoc,colorsMap.values.toSeq,fromPython = true)
   }
 
 }

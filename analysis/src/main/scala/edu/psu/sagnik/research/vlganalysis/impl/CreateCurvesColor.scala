@@ -10,8 +10,8 @@ import org.apache.commons.io.FileUtils
 
 import scala.language.postfixOps
 /**
- * Created by sagnik on 3/5/16.
- */
+  * Created by sagnik on 3/5/16.
+  */
 object CreateCurvesColor {
 
   def colorBasedSegmentation(curvePaths:Seq[SVGPathCurve]):Seq[SVGCurve]=
@@ -89,10 +89,11 @@ object CreateCurvesColor {
   }
 
   def main(args: Array[String]):Unit= {
-    val loc= if (args.nonEmpty)
-      args.head
-    else
-    "src/test/resources/hassan-Figure-2.svg"
+    val loc=
+      args.headOption.
+        getOrElse(
+          "../linegraphproducer/data/1/1.svg"
+        )
     CreateCurvesColor(loc,createImages=true,colorBasedSegmentation)
 
 
