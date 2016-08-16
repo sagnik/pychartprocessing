@@ -74,64 +74,7 @@ object SplitPaths {
       "\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:svg=\"http://www.w3.org/2000/svg\"/>"
 
   }
-
-  def splitPath(pathElems: Seq[PathCommand], path: SVGPathCurve, lep: CordPair, pathSArr: Seq[SVGPathCurve]): Seq[SVGPathCurve] =
-    pathElems match {
-      case Nil => pathSArr
-      case pathElem :: Nil =>
-        if (pathElem.isInstanceOf[Line]) {
-          if (pathElem.args.isEmpty)
-            pathSArr
-          else if (pathElem.args.length == 1) {
-            val lastEp = pathElem.getEndPoint[Line](lep, pathElem.isAbsolute, pathElem.args)
-            val moveCommand = Move(isAbsolute = true, args = Seq(MovePath(lep)))
-            val lineCommand = Line(isAbsolute = true, args = Seq(LinePath(lastEp)))
-            val newSvgCurvePath = createSVGCurvePath(path, moveCommand, lineCommand)
-            pathSArr :+ newSvgCurvePath
-          } else {
-            splitPath(
-              pathElem.args.map(x => Line(isAbsolute = pathElem.isAbsolute, args = Seq(LinePath(x.asInstanceOf[LinePath].eP)))),
-              path,
-              lep,
-              pathSArr
-            )
-          }
-        } else {
-          val lastEp = pathElem.getEndPoint[pathElem.type](lep, pathElem.isAbsolute, pathElem.args)
-          pathSArr
-        }
-      case pathElem :: rest =>
-        val lastEndPoint = pathElem.getEndPoint[pathElem.type](lep, pathElem.isAbsolute, pathElem.args)
-        if (pathElem.isInstanceOf[Line]) {
-          if (pathElem.args.isEmpty)
-            pathSArr
-          else if (pathElem.args.length == 1) {
-            val lastEp = pathElem.getEndPoint[Line](lep, pathElem.isAbsolute, pathElem.args)
-            val moveCommand = Move(isAbsolute = true, args = Seq(MovePath(lep)))
-            val lineCommand = Line(isAbsolute = true, args = Seq(LinePath(lastEp)))
-            val newSvgCurvePath = createSVGCurvePath(path, moveCommand, lineCommand)
-            splitPath(
-              rest,
-              path,
-              lastEndPoint,
-              pathSArr :+ newSvgCurvePath
-            )
-          } else {
-            val splitPaths = pathElem.args.map(
-              x =>
-                Line(isAbsolute = pathElem.isAbsolute, args = Seq(LinePath(x.asInstanceOf[LinePath].eP)))
-            )
-            splitPath(
-              splitPaths ++ rest,
-              path,
-              lep,
-              pathSArr
-            )
-          }
-        } else
-          splitPath(rest, path, lastEndPoint, pathSArr)
-
-    }
+  
 
   //tail-fucking-recursion. Take that, Python. ;)
   def splitPath(pathElems: Seq[PathCommand], path: SVGPathCurve, lep: CordPair, pathSArr: Seq[SVGPathCurve]): Seq[SVGPathCurve] =
