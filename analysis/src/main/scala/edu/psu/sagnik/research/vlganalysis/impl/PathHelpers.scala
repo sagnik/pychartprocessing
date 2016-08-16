@@ -67,8 +67,7 @@ object PathHelpers {
     //this is equivalent to no transformation, this will be corrected when
     //we map this with SVGPathBB
 
-    val dString = pathDStringFromPath(Seq(mC, lC))
-
+    val dString = s"M ${mC.args.head.eP.x},${mC.args.head.eP.y} L ${lC.args.head.eP.x},${lC.args.head.eP.y}"
     "<path d=\"" +
       dString +
       "\" id=\"" +
