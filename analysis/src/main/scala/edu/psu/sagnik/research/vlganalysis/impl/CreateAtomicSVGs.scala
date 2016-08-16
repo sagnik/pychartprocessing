@@ -75,6 +75,64 @@ object SplitPaths {
 
   }
 
+  def splitPath(pathElems: Seq[PathCommand], path: SVGPathCurve, lep: CordPair, pathSArr: Seq[SVGPathCurve]): Seq[SVGPathCurve] =
+    pathElems match {
+      case Nil => pathSArr
+      case pathElem :: Nil =>
+        if (pathElem.isInstanceOf[Line]) {
+          if (pathElem.args.isEmpty)
+            pathSArr
+          else if (pathElem.args.length == 1) {
+            val lastEp = pathElem.getEndPoint[Line](lep, pathElem.isAbsolute, pathElem.args)
+            val moveCommand = Move(isAbsolute = true, args = Seq(MovePath(lep)))
+            val lineCommand = Line(isAbsolute = true, args = Seq(LinePath(lastEp)))
+            val newSvgCurvePath = createSVGCurvePath(path, moveCommand, lineCommand)
+            pathSArr :+ newSvgCurvePath
+          } else {
+            splitPath(
+              pathElem.args.map(x => Line(isAbsolute = pathElem.isAbsolute, args = Seq(LinePath(x.asInstanceOf[LinePath].eP)))),
+              path,
+              lep,
+              pathSArr
+            )
+          }
+        } else {
+          val lastEp = pathElem.getEndPoint[pathElem.type](lep, pathElem.isAbsolute, pathElem.args)
+          pathSArr
+        }
+      case pathElem :: rest =>
+        val lastEndPoint = pathElem.getEndPoint[pathElem.type](lep, pathElem.isAbsolute, pathElem.args)
+        if (pathElem.isInstanceOf[Line]) {
+          if (pathElem.args.isEmpty)
+            pathSArr
+          else if (pathElem.args.length == 1) {
+            val lastEp = pathElem.getEndPoint[Line](lep, pathElem.isAbsolute, pathElem.args)
+            val moveCommand = Move(isAbsolute = true, args = Seq(MovePath(lep)))
+            val lineCommand = Line(isAbsolute = true, args = Seq(LinePath(lastEp)))
+            val newSvgCurvePath = createSVGCurvePath(path, moveCommand, lineCommand)
+            splitPath(
+              rest,
+              path,
+              lastEndPoint,
+              pathSArr :+ newSvgCurvePath
+            )
+          } else {
+            val splitPaths = pathElem.args.map(
+              x =>
+                Line(isAbsolute = pathElem.isAbsolute, args = Seq(LinePath(x.asInstanceOf[LinePath].eP)))
+            )
+            splitPath(
+              splitPaths ++ rest,
+              path,
+              lep,
+              pathSArr
+            )
+          }
+        } else
+          splitPath(rest, path, lastEndPoint, pathSArr)
+
+    }
+
   //tail-fucking-recursion. Take that, Python. ;)
   def splitPath(pathElems: Seq[PathCommand], path: SVGPathCurve, lep: CordPair, pathSArr: Seq[SVGPathCurve]): Seq[SVGPathCurve] =
     pathElems match {
@@ -159,9 +217,11 @@ object SplitPaths {
 
   def apply(loc: String, colors: Seq[String], fromPython: Boolean = true) = {
     val cS = PyChartSVGPathExtract(loc)
-    val graphPaths = cS.filter(p =>
-      colors.exists(color => p.pathStyle.stroke.getOrElse("#ffffff").equalsIgnoreCase(color)))
-    println(graphPaths.length)
+    val graphPaths = cS
+      .filter {
+        p => colors.exists(color => p.pathStyle.stroke.getOrElse("#ffffff").equalsIgnoreCase(color))
+      }
+
     val (fillExists, noFill) = graphPaths.partition(x => {
       (x.pathStyle.fill match {
         case Some(fill) => true
@@ -171,14 +231,24 @@ object SplitPaths {
           "#ffffff".equals(x.pathStyle.stroke.getOrElse("#ffffff")))
     })
 
-    val spPath = noFill.flatMap(c =>
-      SplitPaths.splitPath(
-        c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
-        c,
-        CordPair(c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.x, c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.y),
-        Seq.empty[SVGPathCurve]
-      ))
+    val spPath = noFill
+      .filterNot(_.svgPath.pOps.isEmpty)
+      .flatMap { c =>
+        SplitPaths.splitPath(
+          c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
+          c,
+          CordPair(c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x, c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y),
+          Seq.empty[SVGPathCurve]
+        )
+      }
+
     SVGWriter(spPath, loc, "sps")
+
+  }
+
+  def extractWithoutSplit(loc: String, colors: Seq[String], fromPython: Boolean = true) = {
+    val cS = PyChartSVGPathExtract(loc)
+    SVGWriter(cS, loc, "sps")
 
   }
 
@@ -192,7 +262,7 @@ object TestSplitPaths {
     //val loc="data/10.1.1.104.3077-Figure-1.svg"
     //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
     //val loc = "src/test/resources/10.1.1.113.223-Figure-10.svg"
-    val pyLoc = "../linegraphproducer/data/1/1-square-cross-gold.svg"
+    val pyLoc = "../linegraphproducer/data/2/1.svg"
     //val pyLoc = "../linegraphproducer/data/1/1.svg"
     val colorsMap = Map("indigo" -> "#4B0082", "gold" -> "#FFD700")
     SplitPaths(pyLoc, colorsMap.values.toSeq, fromPython = true)

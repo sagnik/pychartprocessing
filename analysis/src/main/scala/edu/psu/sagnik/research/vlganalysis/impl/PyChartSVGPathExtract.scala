@@ -83,9 +83,31 @@ object PyChartSVGPathExtract {
                 )
               )
             )
+          case pop: QBC =>
+            Some(
+              QBC(
+                isAbsolute = pop.isAbsolute,
+                args = pop.args.map(
+                  popL =>
+                    popL.copy(
+                      eP = CordPair(x = popL.eP.x + x, y = popL.eP.y + y),
+                      cP1 = CordPair(x = popL.cP1.x + x, y = popL.cP1.y + y)
+                    )
+                )
+              )
+            )
+
+          case pop: Close =>
+            Some(
+              Close(
+                isAbsolute = pop.isAbsolute,
+                args = pop.args
+              )
+            )
+
           case _ =>
-            throw new Exception("can't convert path used in <def> command")
-            None //TODO:what happens when the def path has something other than move or lines
+            println(s"can't convert path command ${pop.getClass} used in <def> command.")
+            ??? //throw not implemented exception. TODO:what happens when the def path has something other than move, line or curve
         }
     }
 
@@ -155,9 +177,10 @@ object PyChartSVGPathExtract {
         val x = Try((useCommand \@ "x").toFloat) match { case Success(xExists) => xExists; case Failure(e) => 0f }
         val y = Try((useCommand \@ "y").toFloat) match { case Success(yExists) => yExists; case Failure(e) => 0f }
         val referringID = useCommand \@ "{http://www.w3.org/1999/xlink}href"
-        if (0f.equals(x) || 0f.equals(y) || "".equals(referringID)) //TODO: for markers, we are assuming that x and y are both present here.
+        if ("".equals(referringID)) {
+          println("referring id in <use> command is null, can't process the path")
           None
-        else {
+        } else {
           val svgPathsUsed = svgPaths.filter(x => referringID.substring(1).equals(x.svgPath.id))
           if (svgPathsUsed.size == 0) throw new Exception(s"no referred path in <def> with the referring id ${referringID} in <use>")
           else if (svgPathsUsed.size > 1) throw new Exception(s"multiple referred paths in <def> with the same referring id ${referringID} in <use>")
