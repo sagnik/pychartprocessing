@@ -19,7 +19,6 @@ object PyChartSVGPathExtract {
 
   def apply(fileLoc: String) = {
     val orgPaths = getPaths(XMLReader(fileLoc), GroupExtract.apply(fileLoc))
-    //orgPaths.foreach(x=>println(x.svgPath.id))
     val usePaths = getDefPaths(XMLReader(fileLoc), orgPaths)
 
     orgPaths ++ usePaths
@@ -111,49 +110,7 @@ object PyChartSVGPathExtract {
         }
     }
 
-  lazy val pathDStringFromPath = (pops: Seq[PathCommand]) => pops.flatMap {
-    pop =>
-      pop match {
-        case popM: Move => Some(
-          "M " + popM.args.map(x => x.eP.toString + "," + x.eP.y.toString).mkString(" ")
-        )
-        case popL: Line => Some(
-          "M " + popL.args.map(x => x.eP.toString + "," + x.eP.y.toString).mkString(" ")
-        )
-        case _ => None
-      }
-  }.mkString(" ")
-
-  lazy val pathStringFromStyleAndPathDString = (pStyle: PathStyle, pathDString: String, pathID: String) => {
-    val styleStart = " style=\""
-    val styles = List(
-      pStyle.fill match { case Some(f) => "fill:" + f; case _ => "fill:none" },
-      pStyle.fillRule match { case Some(f) => "fill-rule:" + f; case _ => "fill-rule:nonzero" },
-      pStyle.fillOpacity match { case Some(f) => "fill-opacity:" + f; case _ => "fill-opacity:1" },
-      pStyle.stroke match { case Some(f) => "stroke:" + f; case _ => "stroke:none" },
-      pStyle.strokeWidth match { case Some(f) => "stroke-width:" + f; case _ => "stroke-width:1" },
-      pStyle.strokeLinecap match { case Some(f) => "stroke-linecap:" + f; case _ => "stroke-linecap:butt" },
-      pStyle.strokeLinejoin match { case Some(f) => "stroke-linejoin:" + f; case _ => "stroke-linejoin:miter" },
-      pStyle.strokeMiterlimit match { case Some(f) => "stroke-miterlimit:" + f; case _ => "stroke-miterlimit:4" },
-      pStyle.strokeDasharray match { case Some(f) => "stroke-dasharray:" + f; case _ => "stroke-dasharray:none" },
-      pStyle.strokeDashoffset match { case Some(f) => "stroke-dashoffset:" + f; case _ => "stroke-dashoffset:0" },
-      pStyle.strokeOpacity match { case Some(f) => "stroke-opacity:" + f; case _ => "stroke-opacity:1" }
-    ).mkString(";")
-
-    val styleEnd = "\""
-    val styleString = styleStart + styles + styleEnd
-
-    "<path d=\"" +
-      pathDStringFromPath +
-      "\"" +
-      "id=\"" +
-      pathID +
-      "\"" +
-      styleString +
-      "xmlns=\"http://www.w3.org/2000/svg\" xmlns:svg=\"http://www.w3.org/2000/svg\"/>"
-
-  }
-
+  import PathSplitHelpers._
   lazy val svgPathfromUsed = (p: SVGPath, pStyle: PathStyle, x: Float, y: Float, idIndex: Int) => {
     val changedPOps = changePOps(p.pOps: Seq[PathCommand], x, y)
     val changedPathDString = pathDStringFromPath(changedPOps)
