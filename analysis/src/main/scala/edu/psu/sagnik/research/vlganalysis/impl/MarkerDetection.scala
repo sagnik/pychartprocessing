@@ -141,13 +141,14 @@ object MarkerDetection {
   }
 
   def apply(loc: String, createImages: Boolean): Unit = {
+    import PathHelpers._
     val svgPaths =
       if (loc.contains("-sps")) //this SVG has already paths split
         SVGPathExtract(loc, sps = true)
       else
         SVGPathExtract(loc, sps = false).flatMap(
           c =>
-            SplitPaths.splitPath(
+            splitPath(
               c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
               c,
               CordPair(c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.x, c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.y),

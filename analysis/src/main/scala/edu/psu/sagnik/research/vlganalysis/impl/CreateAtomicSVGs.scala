@@ -8,8 +8,8 @@ import edu.psu.sagnik.research.vlganalysis.model.SVGPathCurve
 import edu.psu.sagnik.research.vlganalysis.writer.SVGWriter
 
 /**
-  * Created by sagnik on 7/13/16.
-  */
+ * Created by sagnik on 7/13/16.
+ */
 object SplitPaths {
 
   def apply(loc: String) = {
@@ -28,7 +28,7 @@ object SplitPaths {
     import PathHelpers._
     val spPath = noFill
       .filterNot(_.svgPath.pOps.isEmpty)
-      .flatMap{c =>
+      .flatMap { c =>
         splitPath(
           c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
           c,

@@ -1,14 +1,14 @@
 package edu.psu.sagnik.research.vlganalysis.impl
 
 import edu.psu.sagnik.research.inkscapesvgprocessing.impl.SVGPathBB
-import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.model.{LinePath, _}
+import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.model.{ LinePath, _ }
 import edu.psu.sagnik.research.inkscapesvgprocessing.transformparser.model.TransformCommand
 import edu.psu.sagnik.research.inkscapesvgprocessing.writer.model.PathStyle
 import edu.psu.sagnik.research.vlganalysis.model.SVGPathCurve
 
 /**
-  * Created by schoudhury on 8/16/16.
-  */
+ * Created by schoudhury on 8/16/16.
+ */
 object PathHelpers {
 
   lazy val pathDStringFromPath = (pops: Seq[PathCommand]) => pops.flatMap {
@@ -24,7 +24,7 @@ object PathHelpers {
       }
   }.mkString(" ")
 
-  lazy val getPathStyle=(pStyle:PathStyle)=>
+  lazy val getPathStyle = (pStyle: PathStyle) =>
     List(
       pStyle.fill match { case Some(f) => "fill:" + f; case _ => "fill:none" },
       pStyle.fillRule match { case Some(f) => "fill-rule:" + f; case _ => "fill-rule:nonzero" },
@@ -38,7 +38,6 @@ object PathHelpers {
       pStyle.strokeDashoffset match { case Some(f) => "stroke-dashoffset:" + f; case _ => "stroke-dashoffset:0" },
       pStyle.strokeOpacity match { case Some(f) => "stroke-opacity:" + f; case _ => "stroke-opacity:1" }
     ).mkString(";")
-
 
   lazy val pathStringFromStyleAndPathDString = (pStyle: PathStyle, pathDString: String, pathID: String) => {
     val styleStart = " style=\""
@@ -58,9 +57,9 @@ object PathHelpers {
   }
 
   def createSVGPathString(
-                           p: PathStyle,
-                           tOps: Seq[TransformCommand], mC: Move, lC: Line, id: String
-                         ): String = {
+    p: PathStyle,
+    tOps: Seq[TransformCommand], mC: Move, lC: Line, id: String
+  ): String = {
 
     val styleString = getPathStyle(p)
 
@@ -68,7 +67,7 @@ object PathHelpers {
     //this is equivalent to no transformation, this will be corrected when
     //we map this with SVGPathBB
 
-    val dString = pathDStringFromPath(Seq(mC,lC))
+    val dString = pathDStringFromPath(Seq(mC, lC))
 
     "<path d=\"" +
       dString +
@@ -82,19 +81,18 @@ object PathHelpers {
 
   }
 
-
   def createSVGCurvePath(path: SVGPathCurve, mC: Move, lC: Line): SVGPathCurve =
     SVGPathCurve(
       svgPath = SVGPathBB(
         path.svgPath.copy(
           pdContent = "M " +
-            mC.args.head.eP.x +
-            "," +
-            mC.args.head.eP.y +
-            " L " +
-            lC.args.head.eP.x +
-            "," +
-            lC.args.head.eP.y,
+          mC.args.head.eP.x +
+          "," +
+          mC.args.head.eP.y +
+          " L " +
+          lC.args.head.eP.x +
+          "," +
+          lC.args.head.eP.y,
           pContent = createSVGPathString(path.pathStyle, path.svgPath.transformOps, mC, lC, path.svgPath.id),
           pOps = Seq(mC, lC)
         )

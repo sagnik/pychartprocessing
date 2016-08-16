@@ -23,13 +23,14 @@ object CreateCurvesColor {
     curvePaths.groupBy(x => x.pathStyle).toSeq.zipWithIndex.map { case (d, index) => SVGCurve(index.toString, d._2) }
 
   def apply(loc: String, createImages: Boolean, segementationFunction: (Seq[SVGPathCurve]) => Seq[SVGCurve]) = {
+    import PathHelpers._
     val svgPaths =
       if (loc.contains("-sps")) //this SVG has already paths split
         SVGPathExtract(loc, sps = true)
       else
         SVGPathExtract(loc, sps = false).flatMap(
           c =>
-            SplitPaths.splitPath(
+            splitPath(
               c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
               c,
               CordPair(c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x, c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y),

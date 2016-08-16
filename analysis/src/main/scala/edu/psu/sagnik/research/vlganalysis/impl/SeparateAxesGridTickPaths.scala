@@ -43,13 +43,26 @@ object SeparateAxesGridTickPaths {
 
   def getAxis(ps: Seq[SVGPathCurve], pos: String): Option[SVGPathCurve] =
     if ("left".equals(pos))
-      ps.filter(a => isVertical(a.svgPath.bb)).sortWith(_.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).x1 < _.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).x1).headOption
+      ps
+        .filter(a => isVertical(a.svgPath.bb))
+        .sortWith(_.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).x1
+          < _.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).x1).headOption
     else if ("right".equals(pos))
-      ps.filter(a => isVertical(a.svgPath.bb)).sortWith(_.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).x2 > _.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).x2).headOption
+      ps
+        .filter(a => isVertical(a.svgPath.bb))
+        .sortWith(_.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).x2
+          > _.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).x2).headOption
     else if ("top".equals(pos))
-      ps.filter(a => !isVertical(a.svgPath.bb)).sortWith(_.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).y1 < _.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).y1).headOption
+      ps
+        .filter(a => !isVertical(a.svgPath.bb))
+        .sortWith(_.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).y1
+          < _.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).y1)
+        .headOption
     else if ("bottom".equals(pos))
-      ps.filter(a => !isVertical(a.svgPath.bb)).sortWith(_.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).y2 > _.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).y2).headOption
+      ps
+        .filter(a => !isVertical(a.svgPath.bb))
+        .sortWith(_.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).y2 > _.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)).y2)
+        .headOption
     else
       ps.headOption // should never reach here
 
@@ -81,14 +94,14 @@ object SeparateAxesGridTickPaths {
     //val loc="data/10.1.1.112.9247-Figure-4.svg"
     val loc = "data/10.1.1.100.3286-Figure-9.svg" //this is a good example. two paths, one drawn by a dashed
     // array and one by a straight line completely overlap, therefore you will get to see the second path as one of the axes lines.
-
+    import PathHelpers._
     val svgPaths =
       if (loc.contains("-sps")) //this SVG has already paths split
         SVGPathExtract(loc, true)
       else
         SVGPathExtract(loc, false).flatMap(
           c =>
-            SplitPaths.splitPath(
+            splitPath(
               c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
               c,
               CordPair(c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.x, c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.y),
