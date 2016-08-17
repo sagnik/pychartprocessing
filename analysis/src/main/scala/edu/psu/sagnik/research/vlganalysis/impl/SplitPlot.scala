@@ -23,7 +23,13 @@ object SplitPlot extends App {
   val texts = pathsFromNonDefs
     .filter(p => p.svgPath.groups.exists(_.id.contains("text")))
 
-  //texts.foreach(p => println(s"[path id]: ${p.svgPath.id} [d]: ${p.svgPath.pdContent} [group id]: ${p.svgPath.groups.map(_.id)}"))
-  SVGWriter(texts, loc, "text")
+  val legendBoundary = pathsFromNonDefs
+    .filter(p => p.svgPath.groups.exists(_.id.contains("legend")))
+
+  val patch = pathsFromNonDefs
+    .filter(p => p.svgPath.groups.exists(_.id.contains("patch")))
+
+  //pathsFromNonDefs.foreach(p => println(s"[path id]: ${p.svgPath.id} [group id]: ${p.svgPath.groups.map(_.id)}"))
+  SVGWriter(legendBoundary, loc, "patch")
 
 }

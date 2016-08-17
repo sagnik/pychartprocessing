@@ -11,27 +11,24 @@ import edu.psu.sagnik.research.vlganalysis.model.SVGPathCurve
  */
 object PathHelpers {
 
-  lazy val pathDStringFromPath = (pops: Seq[PathCommand]) => {
+  lazy val pathDStringFromPath = (pops: Seq[PathCommand]) =>
     pops.flatMap {
-      pop =>
+      pop => //TODO: assuming absolute coordinates here.
         pop match {
-          case popM: Move => Some(
-            "M " + popM.args.map(x => x.eP.toString + "," + x.eP.y.toString).mkString(" ")
-          )
-          case popL: Line => Some(
-            "M " + popL.args.map(x => x.eP.toString + "," + x.eP.y.toString).mkString(" ")
-          )
-          case _ => None
+          case popM: Move => Some("M " + popM.args.map(arg => s"${arg.eP.x},${arg.eP.y}").mkString(" "))
+          case popL: Line => Some("L " + popL.args.map(arg => s"${arg.eP.x},${arg.eP.y}").mkString(" "))
+          case popQ: QBC => Some("Q " + popQ.args.map(arg => s"${arg.cP1.x},${arg.cP1.y} ${arg.eP.x},${arg.eP.y}").mkString(" "))
+          case popZ: Close => Some("z")
+          case _ => ???
         }
     }.mkString(" ")
-  }
 
   lazy val getPathStyle = (pStyle: PathStyle) =>
     List(
       pStyle.fill match { case Some(f) => "fill:" + f; case _ => "fill:none" },
       pStyle.fillRule match { case Some(f) => "fill-rule:" + f; case _ => "fill-rule:nonzero" },
       pStyle.fillOpacity match { case Some(f) => "fill-opacity:" + f; case _ => "fill-opacity:1" },
-      pStyle.stroke match { case Some(f) => "stroke:" + f; case _ => "stroke:#000000" },
+      pStyle.stroke match { case Some(f) => "stroke:" + f; case _ => "stroke:none" },
       pStyle.strokeWidth match { case Some(f) => "stroke-width:" + f; case _ => "stroke-width:1" },
       pStyle.strokeLinecap match { case Some(f) => "stroke-linecap:" + f; case _ => "stroke-linecap:butt" },
       pStyle.strokeLinejoin match { case Some(f) => "stroke-linejoin:" + f; case _ => "stroke-linejoin:miter" },
@@ -42,19 +39,15 @@ object PathHelpers {
     ).mkString(";")
 
   lazy val pathStringFromStyleAndPathDString = (pStyle: PathStyle, pathDString: String, pathID: String) => {
-    val styleStart = " style=\""
-    val styles = getPathStyle(pStyle)
-    val styleEnd = "\""
-    val styleString = styleStart + styles + styleEnd
+    val styleString = getPathStyle(pStyle)
 
     "<path d=\"" +
-      pathDStringFromPath +
-      "\"" +
-      "id=\"" +
+      pathDString +
+      "\" id=\"" +
       pathID +
-      "\"" +
+      "\" style=\"" +
       styleString +
-      "xmlns=\"http://www.w3.org/2000/svg\" xmlns:svg=\"http://www.w3.org/2000/svg\"/>"
+      "\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:svg=\"http://www.w3.org/2000/svg\"/>"
 
   }
 
@@ -68,6 +61,8 @@ object PathHelpers {
         s"L ${cL.args.head.eP.x},${cL.args.head.eP.y} "
       case cQ: QBC =>
         s"Q ${cQ.args.head.cP1.x},${cQ.args.head.cP1.y} ${cQ.args.head.eP.x},${cQ.args.head.eP.y}"
+      case cZ: Close =>
+        s"z"
       case x =>
         println(s"path command to dString not implemented for this type: ${x.getClass}")
         ???

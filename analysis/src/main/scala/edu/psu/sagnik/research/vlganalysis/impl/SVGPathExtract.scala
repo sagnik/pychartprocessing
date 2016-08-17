@@ -74,23 +74,9 @@ object SVGPathExtract {
   }
 
   def getPathStyleObject(x: SVGPathXML): SVGPathCurve = {
-    if (x.svgPath.groups.count(y => y.id.contains("line2d_1")) == 1)
-      println(s"here ${x.styleXML.text}")
     SVGPathCurve(
       svgPath = x.svgPath,
-      pathStyle = PathStyle(
-        fill = returnPattern(x.styleXML \@ "style", "fill"),
-        fillRule = returnPattern(x.styleXML \@ "style", "fill-rule"),
-        fillOpacity = returnPattern(x.styleXML \@ "style", "fill-opacity"),
-        stroke = returnPattern(x.styleXML \@ "style", "stroke"),
-        strokeWidth = returnPattern(x.styleXML \@ "style", "stroke-width"),
-        strokeLinecap = returnPattern(x.styleXML \@ "style", "stroke-linecap"),
-        strokeLinejoin = returnPattern(x.styleXML \@ "style", "stroke-linejoin"),
-        strokeMiterlimit = returnPattern(x.styleXML \@ "style", "stroke-miterlimit"),
-        strokeDasharray = returnPattern(x.styleXML \@ "style", "stroke-dasharray"),
-        strokeDashoffset = returnPattern(x.styleXML \@ "style", "stroke-dashoffset"),
-        strokeOpacity = returnPattern(x.styleXML \@ "style", "stroke-opacity")
-      )
+      pathStyle = getPathStyleObject(x.styleXML)
     )
   }
 

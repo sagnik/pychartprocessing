@@ -20,7 +20,6 @@ object PyChartSVGPathExtract {
   def apply(fileLoc: String) = {
     val orgPaths = getPaths(XMLReader(fileLoc), GroupExtract.apply(fileLoc))
     val usePaths = getDefPathsWithTopLevelGroup(XMLReader(fileLoc), orgPaths)
-    //usePaths.foreach(x => println(s"${x.svgPath.id} ${x.svgPath.pdContent} ${x.svgPath.groups.map(g => s"id: ${g.id}, gtContent: ${g.gtContent} ")}"))
     orgPaths ++ usePaths
   }
 
@@ -227,19 +226,13 @@ object PyChartSVGPathExtract {
             (x \\ "path").map {
               pathNode =>
                 SVGPath(
-                  pathNode.attribute("id") match {
+                  id = pathNode.attribute("id") match {
                     case Some(idExists) =>
-                      val pdContent = pathNode.attribute("d") match {
-                        case Some(con) => con.text
-                        case _ => ""
-                      }
+                      val pdContent = pathNode \@ "d"
                       pathsMappedbyDString += (pdContent -> idExists.text)
                       idExists.text
                     case _ =>
-                      val pdContent = pathNode.attribute("d") match {
-                        case Some(con) => con.text
-                        case _ => ""
-                      }
+                      val pdContent = pathNode \@ "d"
                       val pathCounter =
                         dStringMap.get(pdContent) match {
                           case Some(existingPCounter) => existingPCounter //this path was seen before
@@ -254,7 +247,7 @@ object PyChartSVGPathExtract {
                     case Some(con) => con.text
                     case _ => ""
                   },
-                  pContent = pathNode.toString(),
+                  pContent = pathNode.toString,
                   pOps = SVGPathfromDString.getPathCommands(
                     pathNode.attribute("d") match {
                       case Some(con) => con.text
