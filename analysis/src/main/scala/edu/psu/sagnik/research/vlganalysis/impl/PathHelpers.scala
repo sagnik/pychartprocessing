@@ -29,7 +29,7 @@ object PathHelpers {
       pStyle.fill match { case Some(f) => "fill:" + f; case _ => "fill:none" },
       pStyle.fillRule match { case Some(f) => "fill-rule:" + f; case _ => "fill-rule:nonzero" },
       pStyle.fillOpacity match { case Some(f) => "fill-opacity:" + f; case _ => "fill-opacity:1" },
-      pStyle.stroke match { case Some(f) => "stroke:" + f; case _ => "stroke:none" },
+      pStyle.stroke match { case Some(f) => "stroke:" + f; case _ => "stroke:#000000" },
       pStyle.strokeWidth match { case Some(f) => "stroke-width:" + f; case _ => "stroke-width:1" },
       pStyle.strokeLinecap match { case Some(f) => "stroke-linecap:" + f; case _ => "stroke-linecap:butt" },
       pStyle.strokeLinejoin match { case Some(f) => "stroke-linejoin:" + f; case _ => "stroke-linejoin:miter" },
@@ -56,9 +56,25 @@ object PathHelpers {
 
   }
 
+  lazy val pathDStringFromSingleArgCommand = (command: PathCommand) => {
+    require(command.isAbsolute, "A <relative> path command in pyChart SVG, aborting.")
+    require(command.args.length == 1, "A path command in pyChart SVG has multiple arguments, aborting.")
+    command match {
+      case cM: Move =>
+        s"M ${cM.args.head.eP.x},${cM.args.head.eP.y} "
+      case cL: Line =>
+        s"L ${cL.args.head.eP.x},${cL.args.head.eP.y} "
+      case cQ: QBC =>
+        s"Q ${cQ.args.head.cP1.x},${cQ.args.head.cP1.y} ${cQ.args.head.eP.x},${cQ.args.head.eP.y}"
+      case x =>
+        println(s"path command to dString not implemented for this type: ${x.getClass}")
+        ???
+    }
+  }
+
   def createSVGPathString(
     p: PathStyle,
-    tOps: Seq[TransformCommand], mC: Move, lC: Line, id: String
+    tOps: Seq[TransformCommand], mC: Move, otherCommand: PathCommand, id: String
   ): String = {
 
     val styleString = getPathStyle(p)
@@ -67,7 +83,8 @@ object PathHelpers {
     //this is equivalent to no transformation, this will be corrected when
     //we map this with SVGPathBB
 
-    val dString = s"M ${mC.args.head.eP.x},${mC.args.head.eP.y} L ${lC.args.head.eP.x},${lC.args.head.eP.y}"
+    val dString = s"${pathDStringFromSingleArgCommand(mC)}${pathDStringFromSingleArgCommand(otherCommand)}"
+
     "<path d=\"" +
       dString +
       "\" id=\"" +
@@ -80,26 +97,87 @@ object PathHelpers {
 
   }
 
-  def createSVGCurvePath(path: SVGPathCurve, mC: Move, lC: Line): SVGPathCurve =
-    SVGPathCurve(
-      svgPath = SVGPathBB(
-        path.svgPath.copy(
-          pdContent = "M " +
-          mC.args.head.eP.x +
-          "," +
-          mC.args.head.eP.y +
-          " L " +
-          lC.args.head.eP.x +
-          "," +
-          lC.args.head.eP.y,
-          pContent = createSVGPathString(path.pathStyle, path.svgPath.transformOps, mC, lC, path.svgPath.id),
-          pOps = Seq(mC, lC)
-        )
-      ),
-      pathStyle = path.pathStyle
-    )
+  //we are making sure that the `other command` is not unknown. So far, we know line and
+  //quadratic Bezier curves appear.
+  def createSVGCurvePath(path: SVGPathCurve, mC: Move, otherCommand: PathCommand): SVGPathCurve = otherCommand match {
+    case otherCommand: Line =>
+      SVGPathCurve(
+        svgPath = SVGPathBB(
+          path.svgPath.copy(
+            pdContent = s"${
+            pathDStringFromSingleArgCommand(mC)
+          } ${
+            pathDStringFromSingleArgCommand(otherCommand)
+          }",
+            pContent = createSVGPathString(path.pathStyle, path.svgPath.transformOps, mC, otherCommand, path.svgPath.id),
+            pOps = Seq(mC, otherCommand)
+          )
+        ),
+        pathStyle = path.pathStyle
+      )
+    case otherCommand: QBC =>
+      SVGPathCurve(
+        svgPath = SVGPathBB(
+          path.svgPath.copy(
+            pdContent = s"${
+            pathDStringFromSingleArgCommand(mC)
+          } ${
+            pathDStringFromSingleArgCommand(otherCommand)
+          }",
+            pContent = createSVGPathString(path.pathStyle, path.svgPath.transformOps, mC, otherCommand, path.svgPath.id),
+            pOps = Seq(mC, otherCommand)
+          )
+        ),
+        pathStyle = path.pathStyle
+      )
+    case _ =>
+      println(s" SVGPathCurve creation for paths of type ${otherCommand.getClass} not implemented")
+      ???
+  }
 
-  //tail-fucking-recursion. Take that, Python. ;)
+  /*
+  * SVGs coming from PyChart have two properties: 1. Each command has exactly one argument
+  * (as opposed to multiple arguments) and 2. Commands are always absolute. Therefore we should
+  * process them faster.
+  */
+
+  def splitPathPyChartSVGs(pathElems: Seq[PathCommand], path: SVGPathCurve, firstEndPoint: CordPair): Seq[SVGPathCurve] =
+    pathElems.foldLeft { (firstEndPoint, Seq.empty[SVGPathCurve]) } {
+      case ((endPoint, accum), pathCommand) => {
+        require(pathCommand.isAbsolute, "A <relative> path command in pyChart SVG, aborting.")
+        require(pathCommand.args.length <= 1, s"A path command ${pathCommand.args} in " +
+          s"path ${path.svgPath.pdContent} " +
+          s"in a pyChart SVG has multiple arguments, aborting.")
+        if (pathCommand.args.isEmpty)
+          (endPoint, accum)
+        else {
+          val newEP = pathCommand match {
+            case pathCommand: Line =>
+              pathCommand.getEndPoint[Line](endPoint, pathCommand.isAbsolute, pathCommand.args)
+            case pathCommand: Move =>
+              pathCommand.getEndPoint[Move](endPoint, pathCommand.isAbsolute, pathCommand.args)
+            case pathCommand: QBC =>
+              pathCommand.getEndPoint[QBC](endPoint, pathCommand.isAbsolute, pathCommand.args)
+            case _ =>
+              println("not implemented path command encountered while splitting pyChart SVG.")
+              ???
+          }
+          val moveCommand = Move(isAbsolute = true, args = Seq(MovePath(endPoint)))
+          pathCommand match {
+            case pathCommand: Move => (newEP, accum)
+            case _ => (newEP, accum :+ createSVGCurvePath(path, moveCommand, pathCommand))
+          }
+        }
+      }
+    }
+      ._2
+
+  /*
+  * This is for paths that are coming from generic SVGs, i.e. not PyChart SVGs.
+  * Limitations: Does not handle paths with any command other than move and line command.
+  * for SVGs coming from pycharts, see `splitPathPyChartSVGs`
+  *
+  * */
   def splitPath(pathElems: Seq[PathCommand], path: SVGPathCurve, lep: CordPair, pathSArr: Seq[SVGPathCurve]): Seq[SVGPathCurve] =
     pathElems match {
       case Nil => pathSArr

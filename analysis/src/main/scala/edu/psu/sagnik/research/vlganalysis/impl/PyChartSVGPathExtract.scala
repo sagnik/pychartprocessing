@@ -19,8 +19,8 @@ object PyChartSVGPathExtract {
 
   def apply(fileLoc: String) = {
     val orgPaths = getPaths(XMLReader(fileLoc), GroupExtract.apply(fileLoc))
-    val usePaths = getDefPaths(XMLReader(fileLoc), orgPaths)
-
+    val usePaths = getDefPathsWithTopLevelGroup(XMLReader(fileLoc), orgPaths)
+    //usePaths.foreach(x => println(s"${x.svgPath.id} ${x.svgPath.groups.map(g => s"id: ${g.id}, gtContent: ${g.gtContent} ")}"))
     orgPaths ++ usePaths
   }
 
@@ -111,7 +111,7 @@ object PyChartSVGPathExtract {
     }
 
   import PathHelpers._
-  lazy val svgPathfromUsed = (p: SVGPath, pStyle: PathStyle, x: Float, y: Float, idIndex: Int) => {
+  lazy val svgPathfromUsed = (p: SVGPath, pStyle: PathStyle, x: Float, y: Float, idIndex: Int, group: SVGGroup) => {
     val changedPOps = changePOps(p.pOps: Seq[PathCommand], x, y)
     val changedPathDString = pathDStringFromPath(changedPOps)
     val changedPathContent = pathStringFromStyleAndPathDString(pStyle, changedPathDString, p.id)
@@ -120,19 +120,46 @@ object PyChartSVGPathExtract {
         id = p.id + "-use-" + idIndex.toString,
         pdContent = changedPathDString,
         pContent = changedPathContent,
-        pOps = changedPOps
+        pOps = changedPOps,
+        groups = p.groups :+ group
       )
     )
   }
 
-  def getDefPaths(xmlContent: scala.xml.Elem, svgPaths: Seq[SVGPathCurve]): Seq[SVGPathCurve] = {
-    val useCommands = xmlContent \\ "use"
-    //println(s"useCommands length ${useCommands.size}")
+  def getDefPathsWithTopLevelGroup(
+    xmlContent: scala.xml.Elem,
+    svgPaths: Seq[SVGPathCurve]
+  ): Seq[SVGPathCurve] = {
+    val groups = xmlContent \\ "g"
+    groups.zipWithIndex.map {
+      case (groupXML, index) =>
+        val thisGroupUsePaths = groupXML \ "use"
+        if (thisGroupUsePaths.nonEmpty) {
+          val group = SVGGroup(
+            id = if ((groupXML \@ "id").nonEmpty) (groupXML \@ "id") else s"useGroup-$index",
+            gtContent = groupXML \@ "transform",
+            gContent = groupXML.toString,
+            transformOps = TransformParser(groupXML \@ "transform")
+          )
+          //println(s"${group.id}, ${group.gtContent}, ${group.transformOps} ${getDefPaths(thisGroupUsePaths, svgPaths, group).map(_.svgPath.id)}")
+          getDefPaths(thisGroupUsePaths, svgPaths, group)
+        } else
+          Seq.empty[SVGPathCurve]
+    }
+  }
+    .flatten
+
+  def getDefPaths(
+    useCommands: scala.xml.NodeSeq,
+    svgPaths: Seq[SVGPathCurve],
+    group: SVGGroup
+  ): Seq[SVGPathCurve] = {
     import scala.util.{ Try, Success, Failure }
     useCommands.zipWithIndex.flatMap {
       case (useCommand, index) =>
         val x = Try((useCommand \@ "x").toFloat) match { case Success(xExists) => xExists; case Failure(e) => 0f }
         val y = Try((useCommand \@ "y").toFloat) match { case Success(yExists) => yExists; case Failure(e) => 0f }
+
         val referringID = useCommand \@ "{http://www.w3.org/1999/xlink}href"
         if ("".equals(referringID)) {
           println("referring id in <use> command is null, can't process the path")
@@ -148,7 +175,8 @@ object PyChartSVGPathExtract {
                 svgPathsUsed.head.pathStyle,
                 x,
                 y,
-                index
+                index,
+                group
               )
             )
           )
@@ -196,16 +224,22 @@ object PyChartSVGPathExtract {
             )
 
           val paths =
-            (x \\ "path").map(
+            (x \\ "path").map {
               pathNode =>
                 SVGPath(
                   pathNode.attribute("id") match {
                     case Some(idExists) =>
-                      val pdContent = pathNode.attribute("d") match { case Some(con) => con.text case _ => "" }
+                      val pdContent = pathNode.attribute("d") match {
+                        case Some(con) => con.text
+                        case _ => ""
+                      }
                       pathsMappedbyDString += (pdContent -> idExists.text)
                       idExists.text
                     case _ =>
-                      val pdContent = pathNode.attribute("d") match { case Some(con) => con.text case _ => "" }
+                      val pdContent = pathNode.attribute("d") match {
+                        case Some(con) => con.text
+                        case _ => ""
+                      }
                       val pathCounter =
                         dStringMap.get(pdContent) match {
                           case Some(existingPCounter) => existingPCounter //this path was seen before
@@ -216,18 +250,22 @@ object PyChartSVGPathExtract {
                       pathsMappedbyDString += (pdContent -> pCounter.toString)
                       "noID" + pathCounter
                   },
-                  pdContent = pathNode.attribute("d") match { case Some(con) => con.text case _ => "" },
+                  pdContent = pathNode.attribute("d") match {
+                    case Some(con) => con.text
+                    case _ => ""
+                  },
                   pContent = pathNode.toString(),
                   pOps = SVGPathfromDString.getPathCommands(
                     pathNode.attribute("d") match {
-                      case Some(con) => con.text case _ => ""
+                      case Some(con) => con.text
+                      case _ => ""
                     }
                   ),
                   groups = List.empty[SVGGroup],
                   transformOps = TransformParser(pathNode \@ "transform"),
                   bb = None
                 )
-            )
+            }
 
           val combinedMap =
             combineMaps(

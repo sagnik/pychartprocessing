@@ -30,9 +30,9 @@ object SplitPaths {
       .filterNot(_.svgPath.pOps.isEmpty)
       .flatMap { c =>
         splitPath(
-          c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
+          c.svgPath.pOps.tail, //first command is always move
           c,
-          CordPair(c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.x, c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.y),
+          CordPair(c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x, c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y),
           Seq.empty[SVGPathCurve]
         )
       }
@@ -41,11 +41,22 @@ object SplitPaths {
 
   def apply(loc: String, colors: Seq[String], fromPython: Boolean = true) = {
     val cS = PyChartSVGPathExtract(loc)
-    val graphPaths = cS
-      .filter {
-        p => colors.exists(color => p.pathStyle.stroke.getOrElse("#ffffff").equalsIgnoreCase(color))
-      }
+    val pathIdsFromDefs =
+      cS
+        .filter {
+          _.svgPath.id.contains("-use-")
+        }
+        .map(_.svgPath.id.split("-us").head)
 
+    //println(pathIdsFromDefs)
+
+    val pathsfromNonDefs = cS.filterNot(p => pathIdsFromDefs.exists(x => x.equals(p.svgPath.id)))
+    val graphPaths = pathsfromNonDefs
+    //      cS
+    //        .filter {
+    //          _.svgPath.id.contains("-use-")
+    //        }
+    //graphPaths.foreach(p => println(s"[path id]: ${p.svgPath.id}, [groups]: ${p.svgPath.groups.map(g => s"[id]: ${g.id} [gtContent]: ${g.gtContent}")}"))
     val (fillExists, noFill) = graphPaths.partition(x => {
       (x.pathStyle.fill match {
         case Some(fill) => true
@@ -59,21 +70,14 @@ object SplitPaths {
     val spPath = noFill
       .filterNot(_.svgPath.pOps.isEmpty)
       .flatMap { c =>
-        splitPath(
-          c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
+        splitPathPyChartSVGs(
+          c.svgPath.pOps.tail, //first command is always move
           c,
-          CordPair(c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x, c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y),
-          Seq.empty[SVGPathCurve]
+          CordPair(c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x, c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y)
         )
       }
 
     SVGWriter(spPath, loc, "sps")
-
-  }
-
-  def extractWithoutSplit(loc: String, colors: Seq[String], fromPython: Boolean = true) = {
-    val cS = PyChartSVGPathExtract(loc)
-    SVGWriter(cS, loc, "sps")
 
   }
 
