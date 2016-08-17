@@ -20,7 +20,7 @@ object PyChartSVGPathExtract {
   def apply(fileLoc: String) = {
     val orgPaths = getPaths(XMLReader(fileLoc), GroupExtract.apply(fileLoc))
     val usePaths = getDefPathsWithTopLevelGroup(XMLReader(fileLoc), orgPaths)
-    //usePaths.foreach(x => println(s"${x.svgPath.id} ${x.svgPath.groups.map(g => s"id: ${g.id}, gtContent: ${g.gtContent} ")}"))
+    //usePaths.foreach(x => println(s"${x.svgPath.id} ${x.svgPath.pdContent} ${x.svgPath.groups.map(g => s"id: ${g.id}, gtContent: ${g.gtContent} ")}"))
     orgPaths ++ usePaths
   }
 

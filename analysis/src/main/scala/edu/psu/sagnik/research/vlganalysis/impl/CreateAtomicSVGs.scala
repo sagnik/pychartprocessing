@@ -48,15 +48,11 @@ object SplitPaths {
         }
         .map(_.svgPath.id.split("-us").head)
 
-    //println(pathIdsFromDefs)
+    val pathsfromNonDefs = cS
+      .filterNot(p => pathIdsFromDefs.exists(x => x.equals(p.svgPath.id)))
+      .filter(p => colors.exists(c => p.pathStyle.stroke.getOrElse("#ffffff").equalsIgnoreCase(c)))
 
-    val pathsfromNonDefs = cS.filterNot(p => pathIdsFromDefs.exists(x => x.equals(p.svgPath.id)))
     val graphPaths = pathsfromNonDefs
-    //      cS
-    //        .filter {
-    //          _.svgPath.id.contains("-use-")
-    //        }
-    //graphPaths.foreach(p => println(s"[path id]: ${p.svgPath.id}, [groups]: ${p.svgPath.groups.map(g => s"[id]: ${g.id} [gtContent]: ${g.gtContent}")}"))
     val (fillExists, noFill) = graphPaths.partition(x => {
       (x.pathStyle.fill match {
         case Some(fill) => true

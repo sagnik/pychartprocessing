@@ -11,18 +11,20 @@ import edu.psu.sagnik.research.vlganalysis.model.SVGPathCurve
  */
 object PathHelpers {
 
-  lazy val pathDStringFromPath = (pops: Seq[PathCommand]) => pops.flatMap {
-    pop =>
-      pop match {
-        case popM: Move => Some(
-          "M " + popM.args.map(x => x.eP.toString + "," + x.eP.y.toString).mkString(" ")
-        )
-        case popL: Line => Some(
-          "M " + popL.args.map(x => x.eP.toString + "," + x.eP.y.toString).mkString(" ")
-        )
-        case _ => None
-      }
-  }.mkString(" ")
+  lazy val pathDStringFromPath = (pops: Seq[PathCommand]) => {
+    pops.flatMap {
+      pop =>
+        pop match {
+          case popM: Move => Some(
+            "M " + popM.args.map(x => x.eP.toString + "," + x.eP.y.toString).mkString(" ")
+          )
+          case popL: Line => Some(
+            "M " + popL.args.map(x => x.eP.toString + "," + x.eP.y.toString).mkString(" ")
+          )
+          case _ => None
+        }
+    }.mkString(" ")
+  }
 
   lazy val getPathStyle = (pStyle: PathStyle) =>
     List(
