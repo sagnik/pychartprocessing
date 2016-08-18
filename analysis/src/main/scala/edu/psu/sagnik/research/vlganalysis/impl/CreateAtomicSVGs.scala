@@ -5,7 +5,7 @@ import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.model._
 import edu.psu.sagnik.research.inkscapesvgprocessing.transformparser.model.TransformCommand
 import edu.psu.sagnik.research.inkscapesvgprocessing.writer.model.PathStyle
 import edu.psu.sagnik.research.vlganalysis.model.SVGPathCurve
-import edu.psu.sagnik.research.vlganalysis.writer.SVGWriter
+import edu.psu.sagnik.research.vlganalysis.writer.{ PNGWriter, SVGWriter }
 
 /**
  * Created by sagnik on 7/13/16.
@@ -74,6 +74,7 @@ object SplitPaths {
       }
 
     SVGWriter(spPath, loc, "sps")
+    PNGWriter(loc, "sps")
 
   }
 
@@ -87,7 +88,7 @@ object TestSplitPaths {
     //val loc="data/10.1.1.104.3077-Figure-1.svg"
     //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
     //val loc = "src/test/resources/10.1.1.113.223-Figure-10.svg"
-    val pyLoc = "../linegraphproducer/data/2/1.svg"
+    val pyLoc = "../linegraphproducer/data/1/1.svg"
     //val pyLoc = "../linegraphproducer/data/1/1.svg"
     val colorsMap = Map("indigo" -> "#4B0082", "gold" -> "#FFD700")
     SplitPaths(pyLoc, colorsMap.values.toSeq, fromPython = true)

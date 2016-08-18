@@ -5,7 +5,7 @@ import java.io.File
 import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.model.{ CordPair, MovePath }
 import edu.psu.sagnik.research.inkscapesvgprocessing.reader.XMLReader
 import edu.psu.sagnik.research.vlganalysis.model.{ SVGCurve, SVGPathCurve }
-import edu.psu.sagnik.research.vlganalysis.writer.SVGWriter
+import edu.psu.sagnik.research.vlganalysis.writer.{ PNGWriter, SVGWriter }
 import org.apache.commons.io.FileUtils
 
 import scala.language.postfixOps
@@ -70,6 +70,7 @@ object CreateCurvesColor {
         curveGroups foreach { x =>
           println(s"Creating SVG for curve ${x.id}")
           SVGWriter(x.paths, x.id, loc, curveDir.getAbsolutePath)
+          PNGWriter(x.id, loc, curveDir.getAbsolutePath)
         }
       } else {
         println("Couldn't create directory to store Curve SVG files, exiting.")

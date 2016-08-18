@@ -26,6 +26,10 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-jackson" % "3.2.10",
   //commons io for file writing
   "commons-io" % "commons-io" % "2.4",
+  //for PNG conversions
+  "org.apache.xmlgraphics" % "xmlgraphics-commons" % "1.5",
+  "org.apache.xmlgraphics" % "batik-transcoder" % "1.8",
+  "org.apache.xmlgraphics" % "batik-codec" % "1.8",
   // testing
   "org.scalatest"        %% "scalatest"  %  "2.2.4"
  )

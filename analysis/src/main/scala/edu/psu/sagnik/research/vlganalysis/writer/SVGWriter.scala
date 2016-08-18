@@ -23,7 +23,7 @@ object SVGWriter {
       "\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">" +
       "\n"
 
-    val svgString = curvePaths.map(x => x.svgPath.pContent).foldLeft("")((a, b) => a + "\n" + b)
+    val svgString = curvePaths.map(_.svgPath.pContent).mkString("\n")
 
     val svgEnd = "\n</svg>"
     File(curveSVGLoc).writeAll(svgStart + svgString + svgEnd)
