@@ -27,6 +27,7 @@ object SVGWriter {
 
     val svgEnd = "\n</svg>"
     File(curveSVGLoc).writeAll(svgStart + svgString + svgEnd)
+    println(s"written to $curveSVGLoc")
   }
 
   def apply(curvePaths: Seq[SVGPathCurve], orgSVGLoc: String, ext: String): Unit = {

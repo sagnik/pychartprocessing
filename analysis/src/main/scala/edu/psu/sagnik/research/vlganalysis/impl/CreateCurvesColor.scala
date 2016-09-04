@@ -63,12 +63,12 @@ object CreateCurvesColor {
       val curveDir = new File(loc.substring(0, loc.length - 4))
       val dirResult = if (!curveDir.exists) curveDir.mkdir
       else {
-        FileUtils.deleteDirectory(curveDir); curveDir.mkdir
+        FileUtils.deleteDirectory(curveDir)
+        curveDir.mkdir
       }
 
       if (dirResult) {
         curveGroups foreach { x =>
-          println(s"Creating SVG for curve ${x.id}")
           SVGWriter(x.paths, x.id, loc, curveDir.getAbsolutePath)
           PNGWriter(x.id, loc, curveDir.getAbsolutePath)
         }
@@ -89,14 +89,13 @@ object CreateCurvesColor {
     val curveGroups = segementationFunction(curvePaths)
     if (createImages) {
       val curveDir = new File(loc.substring(0, loc.length - 4))
-      val dirResult = if (!curveDir.exists) curveDir.mkdir
-      else {
+      val dirResult = if (!curveDir.exists) curveDir.mkdir else true
+      /*else {
         FileUtils.deleteDirectory(curveDir); curveDir.mkdir
-      }
+      }*/
       if (dirResult) {
         curveGroups foreach {
           x =>
-            println(s"Creating SVG for curve ${x.id}")
             SVGWriter(x.paths, x.id, loc, curveDir.getAbsolutePath)
         }
       } else {

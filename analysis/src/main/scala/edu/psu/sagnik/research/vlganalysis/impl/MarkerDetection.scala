@@ -5,7 +5,7 @@ import java.io.File
 import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.model.{ CordPair, MovePath }
 import edu.psu.sagnik.research.inkscapesvgprocessing.reader.XMLReader
 import edu.psu.sagnik.research.vlganalysis.model.{ SVGCurve, SVGPathCurve }
-import edu.psu.sagnik.research.vlganalysis.writer.SVGWriter
+import edu.psu.sagnik.research.vlganalysis.writer.{ PNGWriter, SVGWriter }
 import org.apache.commons.io.FileUtils
 
 /**
@@ -151,7 +151,10 @@ object MarkerDetection {
             splitPath(
               c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
               c,
-              CordPair(c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.x, c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.y),
+              CordPair(
+                c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x,
+                c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y
+              ),
               Seq.empty[SVGPathCurve]
             )
         )
@@ -163,23 +166,33 @@ object MarkerDetection {
     })
 
     //TODO: possible exceptions
-    val height = ((XMLReader(loc) \\ "svg")(0) \@ "height").toFloat
-    val width = ((XMLReader(loc) \\ "svg")(0) \@ "width").toFloat
+    val height = if (((XMLReader(loc) \\ "svg").head \@ "height").contains("pt"))
+      ((XMLReader(loc) \\ "svg").head \@ "height").dropRight(2).toFloat
+    else
+      ((XMLReader(loc) \\ "svg").head \@ "height").toFloat
+
+    val width = if (((XMLReader(loc) \\ "svg").head \@ "width").contains("pt"))
+      ((XMLReader(loc) \\ "svg").head \@ "width").dropRight(2).toFloat
+    else
+      ((XMLReader(loc) \\ "svg").head \@ "width").toFloat
+
     val (axes, tics, cPaths) = SeparateAxesGridTickPaths(noFill, width, height)
     val curvePaths = cPaths.filterNot(x => { x.svgPath.bb match { case Some(bb) => bb.x1 == bb.x2 && bb.y1 == bb.y2; case _ => false } })
 
-    val curveGroups = MarkerDetection(curvePaths, noCurveIfMarkerExists = true) //MAKE THIS TRUE IF YOU WANT TO GET JUST THE MARKERS
+    val curveGroups = MarkerDetection(curvePaths, noCurveIfMarkerExists = false) //MAKE THIS TRUE IF YOU WANT TO GET JUST THE MARKERS
     if (createImages) {
       val curveDir = new File(loc.substring(0, loc.length - 4))
-      val dirResult = if (!curveDir.exists) curveDir.mkdir
-      else {
-        FileUtils.deleteDirectory(curveDir); curveDir.mkdir
-      }
+      val dirResult = if (!curveDir.exists) curveDir.mkdir else true
+      /*else {
+        FileUtils.deleteDirectory(curveDir)
+        curveDir.mkdir
+      }*/
 
       if (dirResult) {
         curveGroups foreach { x =>
-          println(s"Creating SVG for curve ${x.id}")
+          //println(s"Creating SVG for curve ${x.id}")
           SVGWriter(x.paths, x.id, loc, curveDir.getAbsolutePath)
+          PNGWriter(x.id, loc, curveDir.getAbsolutePath)
         }
       } else {
         println("Couldn't create directory to store Curve SVG files, exiting.")
@@ -189,23 +202,23 @@ object MarkerDetection {
   }
 
   def main(args: Array[String]): Unit = {
-    val loc = if (args.nonEmpty)
-      args.head
-    else
-      //val loc="data/10.1.1.100.3286-Figure-9.svg"
-      //val loc="data/10.1.1.104.3077-Figure-1.svg"
-      //val loc="data/10.1.1.105.5053-Figure-2.svg"
-
-      "src/test/resources/10.1.1.105.5053-Figure-1.svg"
-    //val loc="src/test/resources/10.1.1.105.5053-Figure-6.svg"
-    //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
-    //val loc="src/test/resources/10.1.1.113.223-Figure-10.svg"
-    //"src/test/resources/10.1.1.100.3286-Figure-9.svg"
-    //val loc="src/test/resources/10.1.1.113.4715-Figure-2.svg"
-    //val loc="src/test/resources/10.1.1.159.7551-Figure-6.svg"
-    //"src/test/resources/10.1.1.160.6544-Figure-4.svg"
-    //  "src/test/resources/10.1.1.152.1889-Figure-4.svg"
-
+    val loc = args
+      .headOption
+      .getOrElse(
+        //val loc="data/10.1.1.100.3286-Figure-9.svg"
+        //val loc="data/10.1.1.104.3077-Figure-1.svg"
+        //val loc="data/10.1.1.105.5053-Figure-2.svg"
+        //      "src/test/resources/10.1.1.105.5053-Figure-1.svg"
+        //val loc="src/test/resources/10.1.1.105.5053-Figure-6.svg"
+        //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
+        //val loc="src/test/resources/10.1.1.113.223-Figure-10.svg"
+        //"src/test/resources/10.1.1.100.3286-Figure-9.svg"
+        //val loc="src/test/resources/10.1.1.113.4715-Figure-2.svg"
+        //val loc="src/test/resources/10.1.1.159.7551-Figure-6.svg"
+        //"src/test/resources/10.1.1.160.6544-Figure-4.svg"
+        //  "src/test/resources/10.1.1.152.1889-Figure-4.svg"
+        "../linegraphproducer/data/1/1-sps.svg"
+      )
     MarkerDetection(loc, createImages = true)
 
   }
