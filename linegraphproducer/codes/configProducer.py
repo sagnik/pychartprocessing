@@ -9,16 +9,19 @@ def main():
             <function>{0}</function>
             <marker>{1}</marker>
             <color>{2}</color>
+            <linestyle>{3}</linestyle>
         </plot>
         <plot>
-            <function>{3}</function>
-            <marker>{4}</marker>
-            <color>{5}</color>
+            <function>{4}</function>
+            <marker>{5}</marker>
+            <color>{6}</color>
+            <linestyle>{7}</linestyle>
         </plot>
     </config>"""
     for i in range(10):
         with open("../configs/{0}.config".format(i),"w") as f:
-            f.write(twoFunctions.format(i,i,i,i+1,i+1,i+1))
+            f.write(twoFunctions.format(i,i,i,1,i+1,i+1,i+1,1)) 
+            #only using dashed lines for now because they are more challenging
             
     
 
