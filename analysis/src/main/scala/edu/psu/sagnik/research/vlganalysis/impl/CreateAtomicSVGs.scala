@@ -90,7 +90,7 @@ object TestSplitPaths {
     //val loc = "src/test/resources/10.1.1.113.223-Figure-10.svg"
     val pyLoc = "../linegraphproducer/data/1/1.svg"
     //val pyLoc = "../linegraphproducer/data/1/1.svg"
-    val colorsMap = Map("indigo" -> "#4B0082", "gold" -> "#FFD700")
+    val colorsMap = ColorMap.colors
     SplitPaths(pyLoc, colorsMap.values.toSeq, fromPython = true)
   }
 

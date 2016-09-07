@@ -15,8 +15,7 @@ def main():
             <marker>{4}</marker>
             <color>{5}</color>
         </plot>
-    </config>
-</xml>"""
+    </config>"""
     for i in range(10):
         with open("../configs/{0}.config".format(i),"w") as f:
             f.write(twoFunctions.format(i,i,i,i+1,i+1,i+1))

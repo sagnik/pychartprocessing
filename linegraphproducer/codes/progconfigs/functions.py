@@ -5,7 +5,11 @@ from numpy import square,power,sin,cos
 def cube(x):
     return power(x,3)
 
+def fourPower(x):
+    return power(x,4)
+
 functionNames={
 'square': square,
 'cube': cube,
+'four': fourPower
 }

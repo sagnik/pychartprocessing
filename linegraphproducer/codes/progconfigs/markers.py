@@ -1,5 +1,6 @@
 markerNames={
 'cross':'x',
-'plus':'+'
+'plus':'+',
+'circle': 'o'
 }
 
