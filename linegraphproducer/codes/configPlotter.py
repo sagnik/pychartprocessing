@@ -20,8 +20,10 @@ def plotSingle(xs,functionName,markerName,colorName,combinedPlotName,axis,putGri
         functionNames[functionName](xs),\
         marker=markerNames[markerName],\
         color=colorNames[colorName],\
+        markeredgecolor=colorNames[colorName],\
         label=functionName,\
-        linestyle='dashed'
+        linestyle='dashed',
+        markerfacecolor='none'
         )
     plt.legend(loc='upper left')
     plt.axis(axis)
@@ -46,8 +48,10 @@ def plotMultiple(xs,plots,combinedPlotName,axis,putGrid=False):
             functionNames[plot['function']](xs),\
             marker=markerNames[plot['marker']],\
             color=colorNames[plot['color']],\
+            markeredgecolor=colorNames[plot['color']],\
             label=plot['function']+"-"+plot['marker']+"-"+plot['color'],\
-            linestyle="dashed"
+            linestyle="dashed",
+            markerfacecolor='none'
             )
         print "plotting function",plot['function'],"with marker",plot['marker'],"and color",plot['color']
 
