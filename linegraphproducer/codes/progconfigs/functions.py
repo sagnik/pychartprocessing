@@ -1,28 +1,60 @@
 #always should have functions that can operate on numpy arrays
 from __future__ import division
-from numpy import square,power,log
+from numpy import exp,square,log
 
-def cube(x):
-    return power(x,3)
+def logisticGrowth1(x):
+    c=1;b=3;a=1;
+    return 1*(c/(1+a*exp(-b*x)))
 
-def squareinverse(x):
-    return 1/power(x,2)
+def logisticGrowth2(x):
+    c=1;b=2;a=1;
+    return 1*(c/(1+a*exp(-b*x)))
+
+def logisticGrowth3(x):
+    c=1;b=2;a=1;
+    return 1*(c/(1+a*exp(-b*x)))
+
+def logisticGrowth4(x):
+    c=1;b=3;a=1;
+    return 1*(c/(1+a*exp(-b*x)))
+
+def logisticGrowth4(x):
+    c=1;b=4;a=1;
+    return 1*(c/(1+a*exp(-b*x)))
+
+def logisticGrowth5(x):
+    c=1;b=5;a=1;
+    return 1*(c/(1+a*exp(-b*x)))
+
+def logisticGrowth6(x):
+    c=1;b=6;a=1;
+    return 1*(c/(1+a*exp(-b*x)))
+
+def logisticGrowth7(x):
+    c=1;b=7;a=1;
+    return 1*(c/(1+a*exp(-b*x)))
 
 def inverse(x):
     return 1/x
 
 def loginverse(x):
-    return 1/log(x)
+    return 1/(log(x)+0.00001)
+
+def squareinverse(x):
+    return 1/square(x)
+
+def cube(x):
+    return pow(x,3)
 
 def cubeinverse(x):
     return 1/cube(x)
 
 functionNames={
-    'square': square,
-    'cube': cube,
-    'inverse': inverse,
-    'squareinverse':squareinverse,
-    'log': log,
-    'loginverse': loginverse,
-    'cubeinverse': cubeinverse
+    'logisticgrowth1': logisticGrowth1,
+    'logisticgrowth2': logisticGrowth2,
+    'logisticgrowth3': logisticGrowth1,
+    'logisticgrowth4': logisticGrowth2,
+    'logisticgrowth5': logisticGrowth1,
+    'logisticgrowth6': logisticGrowth2,
+    'logisticgrowth7': logisticGrowth1,
 }

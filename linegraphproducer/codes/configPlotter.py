@@ -87,11 +87,12 @@ def main():
     configName=sys.argv[1]
     combinedPlotName=configName
     plots=parseConfig(open("../configs/"+configName+".config").read())
-    base = arange(1.0, 10.0, 1.0)
+    base = arange(1.0, 10.0, 0.1)
     fValues=[functionNames[plot['function']](base) for plot in plots]
     #pprint(plots)
     #pprint(fValues)
-    axis=[np.min(base),np.max(base),np.min(fValues),np.max(fValues)]      
+    axis=[np.min(base),np.max(base),np.min(fValues),np.max(fValues)]
+    '''      
     for plot in plots:
         plotSingle(\
                 xs=base,\
@@ -103,7 +104,7 @@ def main():
                 putGrid=False\
                 )
         plt.clf()
-
+    '''
     
     print "\n--------------------------\n"
     print "plotting multiple functions"
