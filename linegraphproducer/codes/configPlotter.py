@@ -83,7 +83,7 @@ def main():
     configName=sys.argv[1]
     combinedPlotName=configName
     plots=parseConfig(open("../configs/"+configName+".config").read())
-    base = arange(0.0, 10.0, 1.0)
+    base = arange(1.0, 10.0, 1.0)
     fValues=[functionNames[plot['function']](base) for plot in plots]
     #pprint(plots)
     #pprint(fValues)

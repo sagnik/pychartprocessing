@@ -1,6 +1,15 @@
 markerNames={
-'cross':'x',
-'plus':'+',
-'circle': 'o'
+    'cross':'x',
+    'plus':'+',
+    'triangle_down': 'v',
+    'triangle_up': '^',
+    'triangle_left': '<',
+    'triangle_right': '>',
+    'octagon': '8',
+    'square': 's',
+    'pentagon': 'p',
+    'star': '*',
+    'hexagon1': 'h',
+    'hexagon2': 'H',
+    'diamond': 'D',
 }
-

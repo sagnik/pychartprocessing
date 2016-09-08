@@ -105,7 +105,7 @@ object PyChartSVGPathExtract {
 
           case _ =>
             println(s"can't convert path command ${pop.getClass} used in <def> command.")
-            ??? //throw not implemented exception. TODO:what happens when the def path has something other than move, line or curve
+            ??? //TODO:what happens when the def path has something other than move, line or curve
         }
     }
 
