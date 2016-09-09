@@ -23,7 +23,7 @@ def main():
         with open("../configs/{0}.config".format(i),"w") as f:
             functions=range(7)
             random.shuffle(functions)
-            markers=range(13)
+            markers=range(7)
             random.shuffle(markers)
             colors=range(140)
             random.shuffle(colors)

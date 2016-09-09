@@ -5,13 +5,21 @@ package edu.psu.sagnik.research.vlganalysis.impl
  */
 object CurveExtractionArchitecture {
   def main(args: Array[String]) = {
-    val pyLoc = "../linegraphproducer/data/0/0.svg"
+    val pyLocBase = s"../linegraphproducer/data/"
     val colorsMap = ColorMap.colors
-    SplitPaths(pyLoc, colorsMap.values.toSeq, fromPython = true)
-    println("created atomic SVG for original plot")
-    CreateCurvesColor(pyLoc.dropRight(4) + "-sps.svg", createImages = true, CreateCurvesColor.colorBasedSegmentation)
-    println("created color based segmentation for atomic svg")
-    MarkerDetection(pyLoc.dropRight(4) + "-sps.svg", createImages = true)
-    println("created marker based segmentation for atomic svg")
+    (0 until 100).foreach { index =>
+      val pyLoc = pyLocBase + s"$index/$index.svg"
+      println(s"working with $pyLoc")
+      SplitPaths(pyLoc, colorsMap.values.toSeq, fromPython = true)
+      println("created atomic SVG for original plot")
+      CreateCurvesColor(
+        pyLoc.dropRight(4) + "-sps.svg",
+        createImages = true,
+        CreateCurvesColor.colorBasedSegmentation
+      )
+      println("created color based segmentation for atomic svg")
+      MarkerDetection(pyLoc.dropRight(4) + "-sps.svg", createImages = true)
+      println("created marker based segmentation for atomic svg")
+    }
   }
 }

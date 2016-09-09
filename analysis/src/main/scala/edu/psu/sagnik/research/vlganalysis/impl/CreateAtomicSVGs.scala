@@ -80,7 +80,7 @@ object SplitPaths {
 
 }
 
-object TestSplitPaths {
+object CreateAtomicSVGs {
   def main(args: Array[String]): Unit = {
     //val loc="src/test/resources/hassan-Figure-2.svg"
     //val loc="data/10.1.1.164.2702-Figure-2.svg"
@@ -88,7 +88,7 @@ object TestSplitPaths {
     //val loc="data/10.1.1.104.3077-Figure-1.svg"
     //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
     //val loc = "src/test/resources/10.1.1.113.223-Figure-10.svg"
-    val pyLoc = "../linegraphproducer/data/1/1.svg"
+    val pyLoc = "src/test/resources/54.svg"
     //val pyLoc = "../linegraphproducer/data/1/1.svg"
     val colorsMap = ColorMap.colors
     SplitPaths(pyLoc, colorsMap.values.toSeq, fromPython = true)

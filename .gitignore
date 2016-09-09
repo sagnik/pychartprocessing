@@ -13,7 +13,7 @@ LOG*
 new/
 .idea*
 verboseresults*
-data/*
+data/
 logs/
 # sbt specific
 .cache/
