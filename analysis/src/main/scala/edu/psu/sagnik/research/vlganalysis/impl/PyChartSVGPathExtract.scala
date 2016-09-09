@@ -111,7 +111,7 @@ object PyChartSVGPathExtract {
 
   import PathHelpers._
   lazy val svgPathfromUsed = (p: SVGPath, pStyle: PathStyle, x: Float, y: Float, idIndex: Int, group: SVGGroup) => {
-    val changedPOps = changePOps(p.pOps: Seq[PathCommand], x, y)
+    val changedPOps = changePOps(p.pOps, x, y)
     val changedPathDString = pathDStringFromPath(changedPOps)
     val changedPathContent = pathStringFromStyleAndPathDString(pStyle, changedPathDString, p.id)
     SVGPathBB(
