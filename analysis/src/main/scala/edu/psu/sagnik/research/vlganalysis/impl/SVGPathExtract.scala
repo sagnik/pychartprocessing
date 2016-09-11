@@ -25,7 +25,8 @@ object SVGPathExtract {
   def getPaths(xmlContent: scala.xml.Elem): Seq[SVGPathCurve] = {
     //This is a path splitted file as created by edu.psu.sagnik.research.vlganalysis.impl.SplitPaths.
     //it doesn't have any group.
-    (xmlContent \ "path").map(x =>
+    //(xmlContent \\ "path").foreach(x => println(x))
+    (xmlContent \\ "path").map(x =>
       SVGPathXML(
         svgPath = SVGPath(
           id = x \@ "id",
@@ -37,7 +38,16 @@ object SVGPathExtract {
           bb = None
         ),
         styleXML = x
-      )).map(x => SVGPathXML(svgPath = SVGPathBB(x.svgPath), styleXML = x.styleXML)).map(x => getPathStyleObject(x))
+      ))
+      .map(
+        x =>
+          SVGPathXML(
+            svgPath = SVGPathBB(x.svgPath),
+            styleXML = x.styleXML
+          )
+      )
+      .map(x =>
+        getPathStyleObject(x))
       .filterNot(a =>
         ("#ffffff".equals(a.pathStyle.fill.getOrElse("#000000")) && "none".equals(a.pathStyle.stroke.getOrElse("none"))) || //the path has no color, either from fill or stroke
           ("#ffffff".equals(a.pathStyle.stroke.getOrElse("none")) && "#none".equals(a.pathStyle.fill.getOrElse("#000000"))))
@@ -67,7 +77,8 @@ object SVGPathExtract {
           bb = None
         ),
         styleXML = x
-      )).map(x => SVGPathXML(svgPath = SVGPathBB(x.svgPath), styleXML = x.styleXML)).map(x => getPathStyleObject(x))
+      ))
+      .map(x => SVGPathXML(svgPath = SVGPathBB(x.svgPath), styleXML = x.styleXML)).map(x => getPathStyleObject(x))
       .filterNot(a =>
         ("#ffffff".equals(a.pathStyle.fill.getOrElse("#000000")) && "none".equals(a.pathStyle.stroke.getOrElse("none"))) || //the path has no color, either from fill or stroke
           ("#ffffff".equals(a.pathStyle.stroke.getOrElse("none")) && "none".equals(a.pathStyle.fill.getOrElse("#000000"))))
@@ -82,10 +93,10 @@ object SVGPathExtract {
 
   def getPathStyleObject(styleXML: NodeSeq): PathStyle = {
     PathStyle(
-      fill = returnPattern(styleXML \@ "style", "fill"),
+      fill = returnPatternFillOrStroke(styleXML \@ "style", "fill"),
       fillRule = returnPattern(styleXML \@ "style", "fill-rule"),
       fillOpacity = returnPattern(styleXML \@ "style", "fill-opacity"),
-      stroke = returnPattern(styleXML \@ "style", "stroke"),
+      stroke = returnPatternFillOrStroke(styleXML \@ "style", "stroke"),
       strokeWidth = returnPattern(styleXML \@ "style", "stroke-width"),
       strokeLinecap = returnPattern(styleXML \@ "style", "stroke-linecap"),
       strokeLinejoin = returnPattern(styleXML \@ "style", "stroke-linejoin"),
@@ -96,6 +107,14 @@ object SVGPathExtract {
     )
   }
   val returnPattern = (pC: String, s: String) =>
-    if (pC.split(";").count(x => x.contains(s)) == 0) None
-    else Some(pC.split(";").filter(x => x.contains(s))(0).split(":")(1))
+    if (!pC.split(";").exists(x => x.contains(s))) None
+    else Some(pC.split(";").filter(x => x.contains(s)).head.split(":")(1))
+
+  val returnPatternFillOrStroke = (pC: String, s: String) =>
+    if (!pC.split(";").exists(x => x.contains(s))) None
+    else if ("none".equals(pC.split(";").filter(x => x.contains(s)).head.split(":")(1)))
+      None
+    else
+      Some(pC.split(";").filter(x => x.contains(s)).head.split(":")(1))
+
 }

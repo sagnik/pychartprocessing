@@ -4,6 +4,7 @@ import java.io.File
 
 import edu.psu.sagnik.research.inkscapesvgprocessing.pathparser.model.{ CordPair, MovePath }
 import edu.psu.sagnik.research.inkscapesvgprocessing.reader.XMLReader
+import edu.psu.sagnik.research.vlganalysis.impl
 import edu.psu.sagnik.research.vlganalysis.model.{ SVGCurve, SVGPathCurve }
 import edu.psu.sagnik.research.vlganalysis.writer.{ PNGWriter, SVGWriter }
 import org.apache.commons.io.FileUtils
@@ -27,22 +28,14 @@ object CreateCurvesColor {
     val svgPaths =
       if (loc.contains("-sps")) //this SVG has already paths split
         SVGPathExtract(loc, sps = true)
-      else
-        SVGPathExtract(loc, sps = false).flatMap(
-          c =>
-            splitPath(
-              c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
-              c,
-              CordPair(c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x, c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y),
-              Seq.empty[SVGPathCurve]
-            )
-        )
-    val (fillExists, noFill) = svgPaths.partition(x => {
-      (x.pathStyle.fill match {
-        case Some(fill) => true
-        case _ => false
-      }) && ("none".equals(x.pathStyle.stroke.getOrElse("none")) || "#ffffff".equals(x.pathStyle.stroke.getOrElse("#ffffff")))
-    })
+      else {
+        val colorsMap = ColorMap.colors
+        SplitPaths(loc, colorsMap.values.toSeq, fromPython = true)
+        SVGPathExtract(loc.dropRight(4) + "-sps.svg", sps = true)
+      }
+        .filterNot(path =>
+          path.pathStyle.fill.isEmpty && path.pathStyle.stroke.isEmpty)
+    svgPaths.foreach { x => println(x.pathStyle.fill + " : " + x.pathStyle.stroke) }
 
     //TODO: possible exceptions
     val height = if (((XMLReader(loc) \\ "svg").head \@ "height").contains("pt"))
@@ -55,7 +48,7 @@ object CreateCurvesColor {
     else
       ((XMLReader(loc) \\ "svg").head \@ "width").toFloat
 
-    val (axes, tics, curvePaths) = SeparateAxesGridTickPaths(noFill, width, height)
+    val (axes, tics, curvePaths) = SeparateAxesGridTickPaths(svgPaths, width, height)
 
     val curveGroups = segementationFunction(curvePaths)
 
@@ -70,7 +63,7 @@ object CreateCurvesColor {
       if (dirResult) {
         curveGroups foreach { x =>
           SVGWriter(x.paths, x.id, loc, curveDir.getAbsolutePath)
-          PNGWriter(x.id, loc, curveDir.getAbsolutePath)
+          //PNGWriter(x.id, loc, curveDir.getAbsolutePath)
         }
       } else {
         println("Couldn't create directory to store Curve SVG files, exiting.")
@@ -110,7 +103,7 @@ object CreateCurvesColor {
     val loc =
       args.headOption.
         getOrElse(
-          "../linegraphproducer/data/1/1-sps.svg"
+          "src/test/resources/14.svg"
         )
     CreateCurvesColor(loc, createImages = true, colorBasedSegmentation)
 

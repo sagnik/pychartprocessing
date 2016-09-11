@@ -104,7 +104,7 @@ object SeparateAxesGridTickPaths {
             splitPath(
               c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
               c,
-              CordPair(c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.x, c.svgPath.pOps(0).args(0).asInstanceOf[MovePath].eP.y),
+              CordPair(c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x, c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y),
               Seq.empty[SVGPathCurve]
             )
         )
