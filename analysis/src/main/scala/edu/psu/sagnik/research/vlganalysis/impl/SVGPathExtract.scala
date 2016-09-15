@@ -112,7 +112,9 @@ object SVGPathExtract {
 
   val returnPatternFillOrStroke = (pC: String, s: String) =>
     if (!pC.split(";").exists(x => x.contains(s))) None
-    else if ("none".equals(pC.split(";").filter(x => x.contains(s)).head.split(":")(1)))
+    else if ("none".equalsIgnoreCase(pC.split(";").filter(x => x.contains(s)).head.split(":")(1)))
+      None
+    else if ("#ffffff".equalsIgnoreCase(pC.split(";").filter(x => x.contains(s)).head.split(":")(1)))
       None
     else
       Some(pC.split(";").filter(x => x.contains(s)).head.split(":")(1))

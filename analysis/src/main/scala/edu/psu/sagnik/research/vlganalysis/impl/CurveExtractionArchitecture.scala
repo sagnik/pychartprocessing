@@ -6,12 +6,13 @@ package edu.psu.sagnik.research.vlganalysis.impl
 object CurveExtractionArchitecture {
   def main(args: Array[String]) = {
     val pyLocBase = s"../linegraphproducer/data/"
-    val colorsMap = ColorMap.colors
-    (0 until 100).foreach { index =>
-      val pyLoc = pyLocBase + s"$index/$index.svg"
+    //val colorsMap = ColorMap.colors
+    (19 until 20).foreach { index =>
+      //val pyLoc = pyLocBase + s"$index/$index.svg"
+      val pyLoc = "src/test/resources/19.svg"
       println(s"working with $pyLoc")
-      SplitPaths(pyLoc, colorsMap.values.toSeq, fromPython = true)
-      println("created atomic SVG for original plot")
+      SplitPaths(pyLoc, fromPython = true)
+      println(s"created atomic SVG for original plot ${pyLoc.dropRight(4) + "-sps.svg"}")
       CreateCurvesColor(
         pyLoc.dropRight(4) + "-sps.svg",
         createImages = true,

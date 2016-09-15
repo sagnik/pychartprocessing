@@ -143,27 +143,16 @@ object MarkerDetection {
   def apply(loc: String, createImages: Boolean): Unit = {
     import PathHelpers._
     val svgPaths =
-      if (loc.contains("-sps")) //this SVG has already paths split
-        SVGPathExtract(loc, sps = true)
-      else
-        SVGPathExtract(loc, sps = false).flatMap(
-          c =>
-            splitPath(
-              c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
-              c,
-              CordPair(
-                c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x,
-                c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y
-              ),
-              Seq.empty[SVGPathCurve]
-            )
-        )
-    val (fillExists, noFill) = svgPaths.partition(x => {
-      (x.pathStyle.fill match {
-        case Some(fill) => true
-        case _ => false
-      }) && ("none".equals(x.pathStyle.stroke.getOrElse("none")) || "#ffffff".equals(x.pathStyle.stroke.getOrElse("#ffffff")))
-    })
+      {
+        if (loc.contains("-sps")) //this SVG has already paths split
+          SVGPathExtract(loc, sps = true)
+        else {
+          SplitPaths(loc, fromPython = true)
+          SVGPathExtract(loc.dropRight(4) + "-sps.svg", sps = true)
+        }
+      }
+        .filterNot(path =>
+          path.pathStyle.fill.isEmpty && path.pathStyle.stroke.isEmpty)
 
     //TODO: possible exceptions
     val height = if (((XMLReader(loc) \\ "svg").head \@ "height").contains("pt"))
@@ -176,12 +165,14 @@ object MarkerDetection {
     else
       ((XMLReader(loc) \\ "svg").head \@ "width").toFloat
 
-    val (axes, tics, cPaths) = SeparateAxesGridTickPaths(noFill, width, height)
-    val curvePaths = cPaths.filterNot(x => { x.svgPath.bb match { case Some(bb) => bb.x1 == bb.x2 && bb.y1 == bb.y2; case _ => false } })
+    val (axes, tics, cPaths) = SeparateAxesGridTickPaths(svgPaths, width, height)
+    val curvePaths = cPaths.filterNot(x => {
+      x.svgPath.bb match { case Some(bb) => bb.x1 == bb.x2 && bb.y1 == bb.y2; case _ => false }
+    })
 
     val curveGroups = MarkerDetection(curvePaths, noCurveIfMarkerExists = false) //MAKE THIS TRUE IF YOU WANT TO GET JUST THE MARKERS
     if (createImages) {
-      val curveDir = new File(loc.substring(0, loc.length - 4))
+      val curveDir = new File(loc.dropRight(4))
       val dirResult = if (!curveDir.exists) curveDir.mkdir else true
       /*else {
         FileUtils.deleteDirectory(curveDir)

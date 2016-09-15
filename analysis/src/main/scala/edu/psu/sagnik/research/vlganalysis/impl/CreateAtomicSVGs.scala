@@ -26,7 +26,7 @@ object SplitPaths {
     })
 
     import PathHelpers._
-    val spPath = noFill
+    val spPath = cS
       .filterNot(_.svgPath.pOps.isEmpty)
       .flatMap { c =>
         splitPath(
@@ -39,8 +39,9 @@ object SplitPaths {
     SVGWriter(spPath, loc, "sps")
   }
 
-  def apply(loc: String, colors: Seq[String], fromPython: Boolean = true) = {
+  def apply(loc: String, fromPython: Boolean = true) = {
     val cS = PyChartSVGPathExtract(loc)
+    //SVGWriter(cS, "src/test/resources/test.svg", "1")
     val pathIdsFromDefs =
       cS
         .filter {
@@ -50,20 +51,13 @@ object SplitPaths {
 
     val pathsfromNonDefs = cS
       .filterNot(p => pathIdsFromDefs.exists(x => x.equals(p.svgPath.id)))
-      .filter(p => colors.exists(c => p.pathStyle.stroke.getOrElse("#ffffff").equalsIgnoreCase(c)))
+      .filterNot(p => p.pathStyle.stroke.isEmpty && p.pathStyle.fill.isEmpty)
+    //.filter(p => colors.exists(c => p.pathStyle.stroke.getOrElse("#ffffff").equalsIgnoreCase(c)))
 
     val graphPaths = pathsfromNonDefs
-    val (fillExists, noFill) = graphPaths.partition(x => {
-      (x.pathStyle.fill match {
-        case Some(fill) => true
-        case _ => false
-      }) &&
-        ("none".equals(x.pathStyle.stroke.getOrElse("none")) ||
-          "#ffffff".equals(x.pathStyle.stroke.getOrElse("#ffffff")))
-    })
 
     import PathHelpers._
-    val spPath = noFill
+    val spPath = graphPaths
       .filterNot(_.svgPath.pOps.isEmpty)
       .flatMap { c =>
         splitPathPyChartSVGs(
@@ -88,10 +82,10 @@ object CreateAtomicSVGs {
     //val loc="data/10.1.1.104.3077-Figure-1.svg"
     //val loc="src/test/resources/10.1.1.108.5575-Figure-16.svg"
     //val loc = "src/test/resources/10.1.1.113.223-Figure-10.svg"
-    val pyLoc = "src/test/resources/54.svg"
+    val pyLoc = "src/test/resources/19.svg"
     //val pyLoc = "../linegraphproducer/data/1/1.svg"
     val colorsMap = ColorMap.colors
-    SplitPaths(pyLoc, colorsMap.values.toSeq, fromPython = true)
+    SplitPaths(pyLoc, fromPython = true)
   }
 
 }

@@ -15,27 +15,36 @@ import scala.language.postfixOps
  */
 object CreateCurvesColor {
 
-  val reverseColorMaps = Map("#4B0082" -> "indigo", "#FFD700" -> "gold")
-
   def colorBasedSegmentation(curvePaths: Seq[SVGPathCurve]): Seq[SVGCurve] =
-    curvePaths.groupBy(x => x.pathStyle.stroke.getOrElse("none")).toSeq.zipWithIndex.map { case (d, index) => SVGCurve(index.toString, d._2) }
+    curvePaths.groupBy(x =>
+      x.pathStyle.stroke.getOrElse("none"))
+      .toSeq
+      .zipWithIndex
+      .map {
+        case (d, index) => SVGCurve(index.toString, d._2)
+      }
 
   def featureBasedSegmentation(curvePaths: Seq[SVGPathCurve]): Seq[SVGCurve] =
     curvePaths.groupBy(x => x.pathStyle).toSeq.zipWithIndex.map { case (d, index) => SVGCurve(index.toString, d._2) }
 
   def apply(loc: String, createImages: Boolean, segementationFunction: (Seq[SVGPathCurve]) => Seq[SVGCurve]) = {
     import PathHelpers._
-    val svgPaths =
-      if (loc.contains("-sps")) //this SVG has already paths split
+    val svgPaths = {
+      if (loc.contains("-sps")) {
+        //this SVG has already paths split
+        println(s"the paths already split, don't need to split them")
         SVGPathExtract(loc, sps = true)
-      else {
-        val colorsMap = ColorMap.colors
-        SplitPaths(loc, colorsMap.values.toSeq, fromPython = true)
+
+      } else {
+        SplitPaths(loc, fromPython = true)
+        println(s"paths splitted ${loc.dropRight(4) + "-sps.svg"}")
         SVGPathExtract(loc.dropRight(4) + "-sps.svg", sps = true)
       }
-        .filterNot(path =>
-          path.pathStyle.fill.isEmpty && path.pathStyle.stroke.isEmpty)
-    svgPaths.foreach { x => println(x.pathStyle.fill + " : " + x.pathStyle.stroke) }
+    }
+      .filterNot(path =>
+        path.pathStyle.fill.isEmpty && path.pathStyle.stroke.isEmpty)
+
+    //svgPaths.foreach { x => println(x.pathStyle.fill + " : " + x.pathStyle.stroke) }
 
     //TODO: possible exceptions
     val height = if (((XMLReader(loc) \\ "svg").head \@ "height").contains("pt"))
@@ -63,7 +72,7 @@ object CreateCurvesColor {
       if (dirResult) {
         curveGroups foreach { x =>
           SVGWriter(x.paths, x.id, loc, curveDir.getAbsolutePath)
-          //PNGWriter(x.id, loc, curveDir.getAbsolutePath)
+          PNGWriter(x.id, loc, curveDir.getAbsolutePath)
         }
       } else {
         println("Couldn't create directory to store Curve SVG files, exiting.")
@@ -103,7 +112,7 @@ object CreateCurvesColor {
     val loc =
       args.headOption.
         getOrElse(
-          "src/test/resources/14.svg"
+          "src/test/resources/19.svg"
         )
     CreateCurvesColor(loc, createImages = true, colorBasedSegmentation)
 

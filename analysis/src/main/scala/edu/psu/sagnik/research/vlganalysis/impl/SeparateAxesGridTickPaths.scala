@@ -92,35 +92,33 @@ object SeparateAxesGridTickPaths {
     //val loc="src/test/resources/hassan-Figure-2.svg"
     //val loc="data/10.1.1.105.5053-Figure-2.svg"
     //val loc="data/10.1.1.112.9247-Figure-4.svg"
-    val loc = "data/10.1.1.100.3286-Figure-9.svg" //this is a good example. two paths, one drawn by a dashed
+    //val loc = "data/10.1.1.100.3286-Figure-9.svg" //this is a good example. two paths, one drawn by a dashed
     // array and one by a straight line completely overlap, therefore you will get to see the second path as one of the axes lines.
+    val loc = "src/test/resources/19-sps.svg"
     import PathHelpers._
-    val svgPaths =
+    val svgPaths = {
       if (loc.contains("-sps")) //this SVG has already paths split
-        SVGPathExtract(loc, true)
-      else
-        SVGPathExtract(loc, false).flatMap(
-          c =>
-            splitPath(
-              c.svgPath.pOps.slice(1, c.svgPath.pOps.length),
-              c,
-              CordPair(c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.x, c.svgPath.pOps.head.args.head.asInstanceOf[MovePath].eP.y),
-              Seq.empty[SVGPathCurve]
-            )
-        )
-
-    val (fillExists, noFill) = svgPaths.partition(x => {
-      (x.pathStyle.fill match {
-        case Some(fill) => true
-        case _ => false
-      }) && ("none".equals(x.pathStyle.stroke.getOrElse("none")) ||
-        "#ffffff".equals(x.pathStyle.stroke.getOrElse("#ffffff")))
-    })
+        SVGPathExtract(loc, sps = true)
+      else {
+        SplitPaths(loc, fromPython = true)
+        SVGPathExtract(loc.dropRight(4) + "-sps.svg", sps = true)
+      }
+    }
+      .filterNot(path =>
+        path.pathStyle.fill.isEmpty && path.pathStyle.stroke.isEmpty)
 
     //TODO: possible exceptions
-    val height = ((XMLReader(loc) \\ "svg")(0) \@ "height").toFloat
-    val width = ((XMLReader(loc) \\ "svg")(0) \@ "width").toFloat
-    val (axes, tics, _) = SeparateAxesGridTickPaths(noFill, width, height)
+    val height = if (((XMLReader(loc) \\ "svg").head \@ "height").contains("pt"))
+      ((XMLReader(loc) \\ "svg").head \@ "height").dropRight(2).toFloat
+    else
+      ((XMLReader(loc) \\ "svg").head \@ "height").toFloat
+
+    val width = if (((XMLReader(loc) \\ "svg").head \@ "width").contains("pt"))
+      ((XMLReader(loc) \\ "svg").head \@ "width").dropRight(2).toFloat
+    else
+      ((XMLReader(loc) \\ "svg").head \@ "width").toFloat
+
+    val (axes, tics, _) = SeparateAxesGridTickPaths(svgPaths, width, height)
     SVGWriter(axes ++ tics, loc, "ats")
   }
 }
