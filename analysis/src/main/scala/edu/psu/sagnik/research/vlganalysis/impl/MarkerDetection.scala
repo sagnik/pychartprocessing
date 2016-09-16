@@ -124,12 +124,16 @@ object MarkerDetection {
     val markerBasedCurves = markerCurveDictionary.flatMap { case (x, y) => if (y.nonEmpty) Some(SVGCurve(x, y)) else None }
     //println(markerBasedCurves.length)
 
-    val restCurves = CreateCurvesColor.featureBasedSegmentation(curvePaths diff (markerCurveDictionary.getOrElse("square", List.empty[SVGPathCurve]) ++
-      markerCurveDictionary.getOrElse("diamond", List.empty[SVGPathCurve]) ++
-      markerCurveDictionary.getOrElse("star", List.empty[SVGPathCurve]) ++
-      markerCurveDictionary.getOrElse("triangle", List.empty[SVGPathCurve]) ++
-      markerCurveDictionary.getOrElse("plus", List.empty[SVGPathCurve]) ++
-      markerCurveDictionary.getOrElse("cross", List.empty[SVGPathCurve])))
+    val restCurves = CreateCurvesColor.featureBasedSegmentation(curvePaths
+      diff
+      (
+        markerCurveDictionary.getOrElse("square", List.empty[SVGPathCurve]) ++
+        markerCurveDictionary.getOrElse("diamond", List.empty[SVGPathCurve]) ++
+        markerCurveDictionary.getOrElse("star", List.empty[SVGPathCurve]) ++
+        markerCurveDictionary.getOrElse("triangle", List.empty[SVGPathCurve]) ++
+        markerCurveDictionary.getOrElse("plus", List.empty[SVGPathCurve]) ++
+        markerCurveDictionary.getOrElse("cross", List.empty[SVGPathCurve])
+      ))
 
     if (noCurveIfMarkerExists && markerCurveDictionary.values.toList.flatten.nonEmpty)
       markerBasedCurves
@@ -181,7 +185,7 @@ object MarkerDetection {
 
       if (dirResult) {
         curveGroups foreach { x =>
-          println(s"Creating SVG for curve ${x.id}")
+          //println(s"Creating SVG for curve ${x.id}")
           SVGWriter(x.paths, x.id, loc, curveDir.getAbsolutePath)
           PNGWriter(x.id, loc, curveDir.getAbsolutePath)
         }
