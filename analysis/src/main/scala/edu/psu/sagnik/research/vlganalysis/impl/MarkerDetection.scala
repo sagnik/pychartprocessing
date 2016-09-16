@@ -181,7 +181,7 @@ object MarkerDetection {
 
       if (dirResult) {
         curveGroups foreach { x =>
-          //println(s"Creating SVG for curve ${x.id}")
+          println(s"Creating SVG for curve ${x.id}")
           SVGWriter(x.paths, x.id, loc, curveDir.getAbsolutePath)
           PNGWriter(x.id, loc, curveDir.getAbsolutePath)
         }

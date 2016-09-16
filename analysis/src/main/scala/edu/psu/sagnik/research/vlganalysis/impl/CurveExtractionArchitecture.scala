@@ -19,8 +19,10 @@ object CurveExtractionArchitecture {
         CreateCurvesColor.colorBasedSegmentation
       )
       println("created color based segmentation for atomic svg")
+
       MarkerDetection(pyLoc.dropRight(4) + "-sps.svg", createImages = true)
       println("created marker based segmentation for atomic svg")
+
     }
   }
 }

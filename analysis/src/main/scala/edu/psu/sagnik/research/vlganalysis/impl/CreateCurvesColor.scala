@@ -112,7 +112,7 @@ object CreateCurvesColor {
     val loc =
       args.headOption.
         getOrElse(
-          "src/test/resources/19.svg"
+          "src/test/resources/19-sps.svg"
         )
     CreateCurvesColor(loc, createImages = true, colorBasedSegmentation)
 
