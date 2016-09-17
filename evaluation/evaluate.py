@@ -1,12 +1,14 @@
 from __future__ import division
 
+import os
 import sys
 import json
 
 import numpy as np
 from skimage.io import imread,imshow
 from munkres import Munkres
-configs=["evalconfigs/1.json"]
+from pprint import pprint
+#configs=["evalconfigs/1.json"]
 
 def getScore(gold,predicted):
     goldImage=imread(gold)[:,:,:-1] #removing alpha
@@ -60,14 +62,29 @@ def score(gold,predicted):
           
 
 def main():
-    j=json.load(open(configs[0]))
+    j=json.load(open(sys.argv[1]))
     golds=j['goldcurves']
     predicteds=j['predictedcurves']
     print "trying to match gold and predicted images"
     maps=map(golds,predicteds)
     print "gold and predicted images matched" 
     scores=[score(gp[0],gp[1]) for gp in maps]
-    print scores 
+    result=[\
+       {'match':{
+             "gold":os.path.abspath(gp[0]),
+             "predicted":os.path.abspath(gp[1])
+        },
+        'precision':s[0],
+        'recall':s[1],
+        'f1score':s[2]
+       }\
+     for (gp,s) in zip (maps,scores)\
+    ]
+    #pprint(result)
+    jsonResultFile=os.path.join("../results/run1/",os.path.split(sys.argv[1])[1])[:-5]+"-result.json"
+    with open(jsonResultFile,"wb") as f:
+        f.write(json.dumps(result, indent=4, sort_keys=True))
+    print "written results at",jsonResultFile 
 
 if __name__ == "__main__":
 	main()

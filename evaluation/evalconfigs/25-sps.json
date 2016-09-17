@@ -1,0 +1,15 @@
+{
+    "goldcurves": [
+        "../linegraphproducer/data/25/25-sps/25-sps-Curve-1.png", 
+        "../linegraphproducer/data/25/25-sps/25-sps-Curve-0.png"
+    ], 
+    "orgfile": "../linegraphproducer/data/25/25-sps.svg", 
+    "predictedcurves": [
+        "../linegraphproducer/data/25/25-sps/25-sps-Curve-triangle.png", 
+        "../linegraphproducer/data/25/25-sps/25-sps-Curve-star.png", 
+        "../linegraphproducer/data/25/25-sps/25-sps-Curve-plus.png", 
+        "../linegraphproducer/data/25/25-sps/25-sps-Curve-square.png", 
+        "../linegraphproducer/data/25/25-sps/25-sps-Curve-rest-0.png", 
+        "../linegraphproducer/data/25/25-sps/25-sps-Curve-cross.png"
+    ]
+}

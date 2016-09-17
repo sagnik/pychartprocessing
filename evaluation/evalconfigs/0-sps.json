@@ -6,7 +6,8 @@
     "orgfile": "../linegraphproducer/data/0/0-sps.svg", 
     "predictedcurves": [
         "../linegraphproducer/data/0/0-sps/0-sps-Curve-cross.png", 
-        "../linegraphproducer/data/0/0-sps/0-sps-Curve-plus.png", 
+        "../linegraphproducer/data/0/0-sps/0-sps-Curve-triangle.png", 
+        "../linegraphproducer/data/0/0-sps/0-sps-Curve-rest-0.png", 
         "../linegraphproducer/data/0/0-sps/0-sps-Curve-star.png"
     ]
 }

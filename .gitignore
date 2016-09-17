@@ -15,6 +15,7 @@ new/
 verboseresults*
 data/
 logs/
+results/
 # sbt specific
 .cache/
 .history/

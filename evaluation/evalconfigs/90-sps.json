@@ -1,0 +1,14 @@
+{
+    "goldcurves": [
+        "../linegraphproducer/data/90/90-sps/90-sps-Curve-1.png", 
+        "../linegraphproducer/data/90/90-sps/90-sps-Curve-0.png"
+    ], 
+    "orgfile": "../linegraphproducer/data/90/90-sps.svg", 
+    "predictedcurves": [
+        "../linegraphproducer/data/90/90-sps/90-sps-Curve-cross.png", 
+        "../linegraphproducer/data/90/90-sps/90-sps-Curve-triangle.png", 
+        "../linegraphproducer/data/90/90-sps/90-sps-Curve-plus.png", 
+        "../linegraphproducer/data/90/90-sps/90-sps-Curve-rest-0.png", 
+        "../linegraphproducer/data/90/90-sps/90-sps-Curve-star.png"
+    ]
+}

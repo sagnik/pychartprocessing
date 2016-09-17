@@ -1,0 +1,12 @@
+{
+    "goldcurves": [
+        "../linegraphproducer/data/76/76-sps/76-sps-Curve-0.png", 
+        "../linegraphproducer/data/76/76-sps/76-sps-Curve-1.png"
+    ], 
+    "orgfile": "../linegraphproducer/data/76/76-sps.svg", 
+    "predictedcurves": [
+        "../linegraphproducer/data/76/76-sps/76-sps-Curve-triangle.png", 
+        "../linegraphproducer/data/76/76-sps/76-sps-Curve-plus.png", 
+        "../linegraphproducer/data/76/76-sps/76-sps-Curve-square.png"
+    ]
+}
