@@ -25,7 +25,10 @@ object CreateCurvesColor {
       }
 
   def featureBasedSegmentation(curvePaths: Seq[SVGPathCurve]): Seq[SVGCurve] =
-    curvePaths.groupBy(x => x.pathStyle).toSeq.zipWithIndex.map { case (d, index) => SVGCurve("rest-" + index.toString, d._2) }
+    curvePaths.groupBy {
+      x => val y = x.pathStyle.copy(stroke = None); y
+    }
+      .toSeq.zipWithIndex.map { case (d, index) => SVGCurve("rest-" + index.toString, d._2) }
 
   def apply(loc: String, createImages: Boolean, segementationFunction: (Seq[SVGPathCurve]) => Seq[SVGCurve]) = {
     import PathHelpers._
