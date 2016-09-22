@@ -3,7 +3,7 @@ from __future__ import division
 from numpy import exp,square,log
 
 def logisticGrowth1(x):
-    c=1;b=3;a=1;
+    c=1;b=1;a=1;
     return 1*(c/(1+a*exp(-b*x)))
 
 def logisticGrowth2(x):
@@ -11,10 +11,6 @@ def logisticGrowth2(x):
     return 1*(c/(1+a*exp(-b*x)))
 
 def logisticGrowth3(x):
-    c=1;b=2;a=1;
-    return 1*(c/(1+a*exp(-b*x)))
-
-def logisticGrowth4(x):
     c=1;b=3;a=1;
     return 1*(c/(1+a*exp(-b*x)))
 
@@ -52,9 +48,9 @@ def cubeinverse(x):
 functionNames={
     'logisticgrowth1': logisticGrowth1,
     'logisticgrowth2': logisticGrowth2,
-    'logisticgrowth3': logisticGrowth1,
-    'logisticgrowth4': logisticGrowth2,
-    'logisticgrowth5': logisticGrowth1,
-    'logisticgrowth6': logisticGrowth2,
-    'logisticgrowth7': logisticGrowth1,
+    'logisticgrowth3': logisticGrowth3,
+    'logisticgrowth4': logisticGrowth4,
+    'logisticgrowth5': logisticGrowth5,
+    'logisticgrowth6': logisticGrowth6,
+    'logisticgrowth7': logisticGrowth7,
 }

@@ -16,9 +16,9 @@ def main():
             f1scores.append(item['f1score'])
     
     print len(precisions),len(recalls),len(f1scores) 
-    print "average precision",np.average(precisions)#,"total",len(precisions) 
-    print "average recall",np.average(recalls)#,"total",len(recalls)        
-    print "average f1 score",np.average(f1scores)#,"total",len(f1scores)        
+    print "average precision",np.average(precisions) 
+    print "average recall",np.average(recalls)     
+    print "average f1 score",np.average(f1scores)        
  
 if __name__ == "__main__":
     main()       

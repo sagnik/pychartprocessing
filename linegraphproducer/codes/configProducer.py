@@ -25,7 +25,7 @@ def main():
             random.shuffle(functions)
             markers=range(7)
             random.shuffle(markers)
-            colors=range(140)
+            colors=range(139)
             random.shuffle(colors)
             f.write(\
              twoFunctions.format(\

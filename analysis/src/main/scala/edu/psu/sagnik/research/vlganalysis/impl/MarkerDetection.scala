@@ -41,10 +41,10 @@ object MarkerDetection {
       //println(cps.length)
       //cps.foreach{a=>println(a.length,pathSeqIntersects(a,marker))}
       //println("------------------")
-      cps.sortWith(pathSeqIntersects(_, marker) > pathSeqIntersects(_, marker)).head
-      //val possibleCurvePathsforMarker = cps.filter(_.count(y => marker.exists(pathIntersects(_, y)))>0.7*noMarkerPoints) //the curve passes through at least 70% of the markers
-      //if (possibleCurvePathsforMarker.isEmpty) List.empty[SVGPathCurve]
-      //else possibleCurvePathsforMarker.sortWith(_.count(y => marker.exists(pathIntersects(_, y)))>_.count(y => marker.exists(pathIntersects(_, y)))).head //paths from this style matches maximally
+      //cps.sortWith(pathSeqIntersects(_, marker) > pathSeqIntersects(_, marker)).head
+      val possibleCurvePathsforMarker = cps.filter(_.count(y => marker.exists(pathIntersects(_, y))) > 0.7 * noMarkerPoints) //the curve passes through at least 70% of the markers
+      if (possibleCurvePathsforMarker.isEmpty) List.empty[SVGPathCurve]
+      else possibleCurvePathsforMarker.sortWith(_.count(y => marker.exists(pathIntersects(_, y))) > _.count(y => marker.exists(pathIntersects(_, y)))).head //paths from this style matches maximally
     }
   }
 
@@ -98,7 +98,10 @@ object MarkerDetection {
       trianglePaths.flatten.distinct ++
       crossPaths.flatten.distinct ++ plusPaths.flatten.distinct)
 
-    val restPathsforMarkerCurveByStyle = restPathsforMarkerCurve.groupBy(_.pathStyle).map(_._2.toList).toList
+    val restPathsforMarkerCurveByStyle = restPathsforMarkerCurve.groupBy {
+      x => val y = x.pathStyle.copy(stroke = None)
+    }
+      .map(_._2.toList).toList
 
     //SVGWriter(plusPaths.flatten.distinct,"src/test/resources/10.1.1.152.1889-Figure-4.svg","test")
 

@@ -5,9 +5,9 @@
     ], 
     "orgfile": "../linegraphproducer/data/71/71-sps.svg", 
     "predictedcurves": [
-        "../linegraphproducer/data/71/71-sps/71-sps-Curve-triangle.png", 
+        "../linegraphproducer/data/71/71-sps/71-sps-Curve-plus.png", 
         "../linegraphproducer/data/71/71-sps/71-sps-Curve-rest-0.png", 
-        "../linegraphproducer/data/71/71-sps/71-sps-Curve-cross.png", 
-        "../linegraphproducer/data/71/71-sps/71-sps-Curve-star.png"
+        "../linegraphproducer/data/71/71-sps/71-sps-Curve-square.png", 
+        "../linegraphproducer/data/71/71-sps/71-sps-Curve-cross.png"
     ]
 }

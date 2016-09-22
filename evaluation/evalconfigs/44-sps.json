@@ -8,8 +8,6 @@
         "../linegraphproducer/data/44/44-sps/44-sps-Curve-triangle.png", 
         "../linegraphproducer/data/44/44-sps/44-sps-Curve-plus.png", 
         "../linegraphproducer/data/44/44-sps/44-sps-Curve-rest-0.png", 
-        "../linegraphproducer/data/44/44-sps/44-sps-Curve-square.png", 
-        "../linegraphproducer/data/44/44-sps/44-sps-Curve-cross.png", 
-        "../linegraphproducer/data/44/44-sps/44-sps-Curve-star.png"
+        "../linegraphproducer/data/44/44-sps/44-sps-Curve-cross.png"
     ]
 }
