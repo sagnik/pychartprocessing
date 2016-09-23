@@ -50,8 +50,8 @@ def plotMultiple(xs,plots,combinedPlotName,axis,putGrid=False):
             color=colorNames[plot['color']],\
             markeredgecolor=colorNames[plot['color']],\
             label=plot['function']+"-"+plot['marker']+"-"+plot['color'],\
-            linestyle="dashed",
-            markerfacecolor='none'
+            linestyle='None',#"dashed",
+            markerfacecolor='None'#'none'
             )
         print "plotting function",plot['function'],"with marker",plot['marker'],"and color",plot['color']
 

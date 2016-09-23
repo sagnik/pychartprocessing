@@ -5,9 +5,7 @@
     ], 
     "orgfile": "../linegraphproducer/data/22/22-sps.svg", 
     "predictedcurves": [
-        "../linegraphproducer/data/22/22-sps/22-sps-Curve-plus.png", 
         "../linegraphproducer/data/22/22-sps/22-sps-Curve-square.png", 
-        "../linegraphproducer/data/22/22-sps/22-sps-Curve-triangle.png", 
-        "../linegraphproducer/data/22/22-sps/22-sps-Curve-rest-0.png"
+        "../linegraphproducer/data/22/22-sps/22-sps-Curve-triangle.png"
     ]
 }

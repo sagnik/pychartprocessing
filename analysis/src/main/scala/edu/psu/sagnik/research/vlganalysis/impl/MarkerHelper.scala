@@ -63,42 +63,69 @@ object MarkerHelper {
         Rectangle.rectInterSects(bb1, bb2) //TODO: check correctness
     }
 
-  //TODO: currently the code treats (left and right) & (top & bottom) carets as the same, change in future?
-  def isLeftCaret(b1: Rectangle, b2: Rectangle): Boolean = !(Rectangle(0f, 0f, 0f, 0f).equals(b1) || Rectangle(0f, 0f, 0f, 0f).equals(b2)) &&
-    ((b1.y2 == b2.y1) || (b1.y1 == b2.y2)) && (b1.x1 == b2.x1) && (b1.x2 - b1.x1).equals(b2.x2 - b2.x1)
+  def isLeftOrRightCaret(b1: Rectangle, b2: Rectangle): Boolean =
+    !(Rectangle(0f, 0f, 0f, 0f).equals(b1) || Rectangle(0f, 0f, 0f, 0f).equals(b2)) &&
+      ((b1.y2 == b2.y1) || (b1.y1 == b2.y2)) &&
+      (b1.x1 == b2.x1) &&
+      (b1.x2 == b2.x2)
 
-  def isRightCaret(b1: Rectangle, b2: Rectangle): Boolean = !(Rectangle(0f, 0f, 0f, 0f).equals(b1) || Rectangle(0f, 0f, 0f, 0f).equals(b2)) &&
-    ((b1.y2 == b2.y1) || (b1.y1 == b2.y2)) && (b1.x2 == b2.x2) && (b1.x2 - b1.x1).equals(b2.x2 - b2.x1)
+  def isUpOrDownCaret(b1: Rectangle, b2: Rectangle): Boolean =
+    !(Rectangle(0f, 0f, 0f, 0f).equals(b1) || Rectangle(0f, 0f, 0f, 0f).equals(b2)) &&
+      ((b1.x1 == b2.x2) || (b1.x2 == b2.x1)) &&
+      (b1.y1 == b2.y1) &&
+      (b1.y2 == b2.y2)
 
-  def isUpCaret(b1: Rectangle, b2: Rectangle): Boolean = !(Rectangle(0f, 0f, 0f, 0f).equals(b1) || Rectangle(0f, 0f, 0f, 0f).equals(b2)) &&
-    ((b1.x1 == b2.x2) || (b1.x2 == b2.x1)) && (b1.y1 == b2.y1) && (b1.y2 - b1.y1).equals(b2.y2 - b2.y1)
+  def isLeftCaret(b1: Rectangle, b2: Rectangle, bV: Rectangle): Boolean =
+    !(Rectangle(0f, 0f, 0f, 0f).equals(b1) || Rectangle(0f, 0f, 0f, 0f).equals(b2)) &&
+      ((b1.y2 == b2.y1) || (b1.y1 == b2.y2)) &&
+      (b1.x1 == b2.x1) &&
+      (b1.x2 == b2.x2) &&
+      (b1.x2 == bV.x1)
 
-  def isDownCaret(b1: Rectangle, b2: Rectangle): Boolean = !(Rectangle(0f, 0f, 0f, 0f).equals(b1) || Rectangle(0f, 0f, 0f, 0f).equals(b2)) &&
-    ((b1.x1 == b2.x2) || (b1.x2 == b2.x1)) && (b1.y2 == b2.y2) && (b1.y2 - b1.y1).equals(b2.y2 - b2.y1)
+  def isRightCaret(b1: Rectangle, b2: Rectangle, bV: Rectangle): Boolean =
+    !(Rectangle(0f, 0f, 0f, 0f).equals(b1) || Rectangle(0f, 0f, 0f, 0f).equals(b2)) &&
+      ((b1.y2 == b2.y1) || (b1.y1 == b2.y2)) &&
+      (b1.x1 == b2.x1) &&
+      (b1.x2 == b2.x2) &&
+      (b1.x1 == bV.x1)
 
-  def isCaret(cs: List[SVGPathCurve], dir: String): Boolean =
+  def isUpCaret(b1: Rectangle, b2: Rectangle, bH: Rectangle): Boolean =
+    !(Rectangle(0f, 0f, 0f, 0f).equals(b1) || Rectangle(0f, 0f, 0f, 0f).equals(b2)) &&
+      ((b1.x1 == b2.x2) || (b1.x2 == b2.x1)) &&
+      (b1.y1 == b2.y1) &&
+      (b1.y2 == b2.y2) &&
+      (b1.y2 == bH.y1)
+
+  def isDownCaret(b1: Rectangle, b2: Rectangle, bH: Rectangle): Boolean =
+    !(Rectangle(0f, 0f, 0f, 0f).equals(b1) || Rectangle(0f, 0f, 0f, 0f).equals(b2)) &&
+      ((b1.x1 == b2.x2) || (b1.x2 == b2.x1)) &&
+      (b1.y1 == b2.y1) &&
+      (b1.y2 == b2.y2) &&
+      (b1.y1 == bH.y1)
+
+  def isCaret(cs: List[SVGPathCurve], hvLine: SVGPathCurve, dir: String): Boolean =
     if (cs.length != 2) false
     else {
       val bbs = cs.map(x => x.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)))
-      if ("left".equals(dir)) isLeftCaret(bbs(0), bbs(1))
-      else if ("right".equals(dir)) isRightCaret(bbs(0), bbs(1))
-      else if ("up".equals(dir)) isUpCaret(bbs(0), bbs(1))
-      else if ("down".equals(dir)) isDownCaret(bbs(0), bbs(1))
+      if ("left".equals(dir)) isLeftCaret(bbs.head, bbs.tail.head, hvLine.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)))
+      else if ("right".equals(dir)) isRightCaret(bbs.head, bbs.tail.head, hvLine.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)))
+      else if ("up".equals(dir)) isUpCaret(bbs.head, bbs.tail.head, hvLine.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)))
+      else if ("down".equals(dir)) isDownCaret(bbs.head, bbs.tail.head, hvLine.svgPath.bb.getOrElse(Rectangle(0f, 0f, 0f, 0f)))
       else false
     }
 
-  def isCaret(cs: List[SVGPathCurve]): Boolean =
+  def isCaret(cs: List[SVGPathCurve], hvLine: SVGPathCurve): Boolean =
     if (cs.length != 2) false
-    else isCaret(cs, "left") || isCaret(cs, "right") || isCaret(cs, "up") || isCaret(cs, "down")
+    else isCaret(cs, hvLine, "left") || isCaret(cs, hvLine, "right") || isCaret(cs, hvLine, "up") || isCaret(cs, hvLine, "down")
 
-  def isCaret(cs: Seq[SVGPathCurve]): Boolean = isCaret(cs.toList)
+  //def isCaret(cs: Seq[SVGPathCurve]): Boolean = isCaret(cs.toList)
 
-  def isCaret(p1: SVGPathCurve, p2: SVGPathCurve, dir: String): Boolean = isCaret(List(p1, p2), dir)
+  def isCaret(p1: SVGPathCurve, p2: SVGPathCurve, hvLine: SVGPathCurve, dir: String): Boolean = isCaret(List(p1, p2), hvLine, dir)
 
-  def createsCaret(xs: Seq[SVGPathCurve], dir: String): Boolean =
+  def createsCaret(xs: Seq[SVGPathCurve], hvLine: SVGPathCurve, dir: String): Boolean =
     (xs.map(a => a.pathStyle).distinct.length == 1) &&
       !xs.exists(a => isHV(a)) &&
-      isCaret(xs.toList, dir)
+      isCaret(xs.toList, hvLine, dir)
 
   /************************* actual shapes *****************************************************/
 
@@ -114,10 +141,31 @@ object MarkerHelper {
       xs.forall(isHV(_)) //both lines are HV line
 
   def createsTriangle(xs: Seq[SVGPathCurve]): Boolean =
+    createsLeftTriangle(xs) || createsRightTriangle(xs) || createsUpTriangle(xs) || createsDownTriangle(xs)
+
+  def createsLeftTriangle(xs: Seq[SVGPathCurve]): Boolean =
     xs.length == 3 &&
       (xs.map(a => a.pathStyle).distinct.length == 1) &&
       (xs.count(isHV(_)) == 1) && //there's exactly one HV line
-      isCaret(xs.filter(!isHV(_)))
+      isCaret(cs = xs.filter(!isHV(_)).toList, hvLine = xs.filter(isHV(_)).head, "left")
+
+  def createsRightTriangle(xs: Seq[SVGPathCurve]): Boolean =
+    xs.length == 3 &&
+      (xs.map(a => a.pathStyle).distinct.length == 1) &&
+      (xs.count(isHV(_)) == 1) && //there's exactly one HV line
+      isCaret(cs = xs.filter(!isHV(_)).toList, hvLine = xs.filter(isHV(_)).head, "right")
+
+  def createsUpTriangle(xs: Seq[SVGPathCurve]): Boolean =
+    xs.length == 3 &&
+      (xs.map(a => a.pathStyle).distinct.length == 1) &&
+      (xs.count(isHV(_)) == 1) && //there's exactly one HV line
+      isCaret(cs = xs.filter(!isHV(_)).toList, hvLine = xs.filter(isHV(_)).head, "up")
+
+  def createsDownTriangle(xs: Seq[SVGPathCurve]): Boolean =
+    xs.length == 3 &&
+      (xs.map(a => a.pathStyle).distinct.length == 1) &&
+      (xs.count(isHV(_)) == 1) && //there's exactly one HV line
+      isCaret(cs = xs.filter(!isHV(_)).toList, hvLine = xs.filter(isHV(_)).head, "down")
 
   def createsSquare(xs: Seq[SVGPathCurve]): Boolean =
     xs.length == 4 &&
@@ -132,15 +180,10 @@ object MarkerHelper {
       xs.forall(x => xs.count(y => pathIntersects(x, y)) == 3) && //each path intersect with every other path
       xs.filter(x => !isHV(x))(0).svgPath.bb.equals(xs.filter(x => !isHV(x))(1).svgPath.bb) //non hv paths have the same bb.
 
+  //TODO: better algorithm for diamond
   def createsDiamond(xs: Seq[SVGPathCurve]): Boolean =
     xs.length == 4 &&
       (xs.map(a => a.pathStyle).distinct.length == 1) &&
-      !xs.exists(isHV(_)) && //there's no HV line
-      {
-        xs.combinations(2).toList.exists(a => isCaret(a.toList, "up")) &&
-          xs.combinations(2).toList.exists(a => isCaret(a.toList, "left")) &&
-          xs.combinations(2).toList.exists(a => isCaret(a.toList, "right")) &&
-          xs.combinations(2).toList.exists(a => isCaret(a.toList, "down"))
-      }
+      !xs.exists(isHV(_))
 
 }

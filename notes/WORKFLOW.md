@@ -19,7 +19,7 @@
 
 1. Go to `../evaluation`.
 
-2. Run `CreateEvaluationConfig.py ..linegraphproducer/data/$i/$i-sps` (make sure **not** to put trailing slash). This will create evaluation config files at `evalconfig` directory.
+2. Run `CreateEvaluationConfig.py ../linegraphproducer/data/$i/$i-sps` (make sure **not** to put trailing slash). This will create evaluation config files at `evalconfig` directory.
   
-3. Run `evaluate.py evalconfig/$i-sps.json` to create result files at `../results/run<$i>` directory.  
+3. Run `evaluate.py evalconfigs/$i-sps.json $k` to create result files at `../results/run<$k>` directory.  
   

@@ -81,7 +81,10 @@ def main():
      for (gp,s) in zip (maps,scores)\
     ]
     #pprint(result)
-    jsonResultFile=os.path.join("../results/run1/",os.path.split(sys.argv[1])[1])[:-5]+"-result.json"
+    resultDir="../results/run{0}/".format(sys.argv[2])
+    if not os.path.exists(resultDir):
+        os.mkdir(resultDir)
+    jsonResultFile=os.path.join(resultDir,os.path.split(sys.argv[1])[1])[:-5]+"-result.json"
     with open(jsonResultFile,"wb") as f:
         f.write(json.dumps(result, indent=4, sort_keys=True))
     print "written results at",jsonResultFile 
