@@ -184,6 +184,8 @@ object MarkerHelper {
   def createsDiamond(xs: Seq[SVGPathCurve]): Boolean =
     xs.length == 4 &&
       (xs.map(a => a.pathStyle).distinct.length == 1) &&
-      !xs.exists(isHV(_))
+      !xs.exists(isHV(_)) &&
+      xs.combinations(2).count { c => isLeftOrRightCaret(c.head.svgPath.bb.get, c.tail.head.svgPath.bb.get) } == 2 &&
+      xs.combinations(2).count { c => isUpOrDownCaret(c.head.svgPath.bb.get, c.tail.head.svgPath.bb.get) } == 2
 
 }

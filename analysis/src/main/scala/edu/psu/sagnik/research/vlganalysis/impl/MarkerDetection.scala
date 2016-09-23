@@ -23,7 +23,10 @@ object MarkerDetection {
   def createsSquare(xs: List[SVGPathCurve]) = MarkerHelper.createsSquare(xs.toIndexedSeq)
   def createsStar(xs: List[SVGPathCurve]) = MarkerHelper.createsStar(xs.toIndexedSeq)
   def createsDiamond(xs: List[SVGPathCurve]) = MarkerHelper.createsDiamond(xs.toIndexedSeq)
-  def createsTriangle(xs: List[SVGPathCurve]) = MarkerHelper.createsTriangle(xs.toIndexedSeq)
+  def createsLeftTriangle(xs: List[SVGPathCurve]) = MarkerHelper.createsLeftTriangle(xs.toIndexedSeq)
+  def createsRightTriangle(xs: List[SVGPathCurve]) = MarkerHelper.createsRightTriangle(xs.toIndexedSeq)
+  def createsUpTriangle(xs: List[SVGPathCurve]) = MarkerHelper.createsUpTriangle(xs.toIndexedSeq)
+  def createsDownTriangle(xs: List[SVGPathCurve]) = MarkerHelper.createsDownTriangle(xs.toIndexedSeq)
   def createsCross(xs: List[SVGPathCurve]) = MarkerHelper.createsCross(xs.toIndexedSeq)
   def createsPlus(xs: List[SVGPathCurve]) = MarkerHelper.createsPlus(xs.toIndexedSeq)
   def pathIntersects(p1: SVGPathCurve, p2: SVGPathCurve): Boolean = MarkerHelper.pathIntersects(p1, p2)
@@ -76,13 +79,20 @@ object MarkerDetection {
       restThreePaths.toList.map(List(_))
     )
 
-    //There's no way to distinguish between left a right caret or a top or down caret given JUST the bounding box.
-    //TODO: a better caret detection algorithm?
+    val (leftTrianglePaths, nonLeftTrianglePaths) = markerThresholdReject(threePaths, createsLeftTriangle)
+    val (rightTrianglePaths, nonRightTrianglePaths) = markerThresholdReject(nonLeftTrianglePaths, createsLeftTriangle)
+    val (upTrianglePaths, nonUpTrianglePaths) = markerThresholdReject(nonRightTrianglePaths, createsUpTriangle)
+    val (downTrianglePaths, nonDownTrianglePaths) = markerThresholdReject(nonUpTrianglePaths, createsDownTriangle)
 
-    val (trianglePaths, nonTrianglePaths) = markerThresholdReject(threePaths, createsTriangle) //threePaths.partition(createsTriangle(_))
+    val trianglePaths = leftTrianglePaths ++ rightTrianglePaths ++ upTrianglePaths ++ downTrianglePaths
 
-    val restTwoPaths = curvePaths diff (sqPaths.flatten.distinct ++ diamondPaths.flatten.distinct ++ starPaths.flatten.distinct ++ trianglePaths.flatten.distinct)
-
+    val restTwoPaths = curvePaths diff (
+      sqPaths.flatten.distinct ++
+      diamondPaths.flatten.distinct ++
+      starPaths.flatten.distinct ++
+      trianglePaths.flatten.distinct
+    )
+    
     val twoPaths = new Combination[SVGPathCurve].combinationTL[SVGPathCurve](
       2,
       1,
@@ -94,11 +104,15 @@ object MarkerDetection {
     val (crossPaths, nonCrossPaths) = markerThresholdReject(twoPaths, createsCross) //twoPaths.partition(createsCross(_))
     val (plusPaths, nonPlusPaths) = markerThresholdReject(nonCrossPaths, createsPlus) //nonCrossPaths.partition(createsPlus(_))
 
-    val restPathsforMarkerCurve = curvePaths diff (sqPaths.flatten.distinct ++ diamondPaths.flatten.distinct ++ starPaths.flatten.distinct ++
-      trianglePaths.flatten.distinct ++
-      crossPaths.flatten.distinct ++ plusPaths.flatten.distinct)
+    val restPathsForMarkerCurve = curvePaths diff
+      (sqPaths.flatten.distinct ++
+        diamondPaths.flatten.distinct ++
+        starPaths.flatten.distinct ++
+        trianglePaths.flatten.distinct ++
+        crossPaths.flatten.distinct ++
+        plusPaths.flatten.distinct)
 
-    val restPathsforMarkerCurveByStyle = restPathsforMarkerCurve.groupBy {
+    val restPathsForMarkerCurveByStyle = restPathsForMarkerCurve.groupBy {
       x => val y = x.pathStyle.copy(stroke = None)
     }
       .map(_._2.toList).toList
@@ -106,12 +120,23 @@ object MarkerDetection {
     //SVGWriter(plusPaths.flatten.distinct,"src/test/resources/10.1.1.152.1889-Figure-4.svg","test")
 
     val markerCurveDictionary = if (!noCurveIfMarkerExists) Map(
-      "square" -> (sqPaths.flatten.distinct ++ curvePathsforMarker(restPathsforMarkerCurveByStyle, sqPaths.flatten.distinct, sqPaths.length)),
-      "diamond" -> (diamondPaths.flatten.distinct ++ curvePathsforMarker(restPathsforMarkerCurveByStyle, diamondPaths.flatten.distinct, diamondPaths.length)),
-      "star" -> (starPaths.flatten.distinct ++ curvePathsforMarker(restPathsforMarkerCurveByStyle, starPaths.flatten.distinct, starPaths.length)),
-      "triangle" -> (trianglePaths.flatten.distinct ++ curvePathsforMarker(restPathsforMarkerCurveByStyle, trianglePaths.flatten.distinct, trianglePaths.length)),
-      "plus" -> (plusPaths.flatten.distinct ++ curvePathsforMarker(restPathsforMarkerCurveByStyle, plusPaths.flatten.distinct, plusPaths.length)),
-      "cross" -> (crossPaths.flatten.distinct ++ curvePathsforMarker(restPathsforMarkerCurveByStyle, crossPaths.flatten.distinct, crossPaths.length))
+      "square" -> (sqPaths.flatten.distinct ++ curvePathsforMarker(restPathsForMarkerCurveByStyle, sqPaths.flatten.distinct, sqPaths.length)),
+
+      "diamond" -> (diamondPaths.flatten.distinct ++ curvePathsforMarker(restPathsForMarkerCurveByStyle, diamondPaths.flatten.distinct, diamondPaths.length)),
+
+      "star" -> (starPaths.flatten.distinct ++ curvePathsforMarker(restPathsForMarkerCurveByStyle, starPaths.flatten.distinct, starPaths.length)),
+
+      "leftTriangle" -> (leftTrianglePaths.flatten.distinct ++ curvePathsforMarker(restPathsForMarkerCurveByStyle, leftTrianglePaths.flatten.distinct, leftTrianglePaths.length)),
+
+      "rightTriangle" -> (rightTrianglePaths.flatten.distinct ++ curvePathsforMarker(restPathsForMarkerCurveByStyle, rightTrianglePaths.flatten.distinct, rightTrianglePaths.length)),
+
+      "upTriangle" -> (upTrianglePaths.flatten.distinct ++ curvePathsforMarker(restPathsForMarkerCurveByStyle, upTrianglePaths.flatten.distinct, upTrianglePaths.length)),
+
+      "downTriangle" -> (downTrianglePaths.flatten.distinct ++ curvePathsforMarker(restPathsForMarkerCurveByStyle, leftTrianglePaths.flatten.distinct, downTrianglePaths.length)),
+
+      "plus" -> (plusPaths.flatten.distinct ++ curvePathsforMarker(restPathsForMarkerCurveByStyle, plusPaths.flatten.distinct, plusPaths.length)),
+
+      "cross" -> (crossPaths.flatten.distinct ++ curvePathsforMarker(restPathsForMarkerCurveByStyle, crossPaths.flatten.distinct, crossPaths.length))
     )
 
     else
@@ -119,7 +144,10 @@ object MarkerDetection {
         "square" -> sqPaths.flatten.distinct,
         "diamond" -> diamondPaths.flatten.distinct,
         "star" -> starPaths.flatten.distinct,
-        "triangle" -> trianglePaths.flatten.distinct,
+        "leftTriangle" -> leftTrianglePaths.flatten.distinct,
+        "rightTriangle" -> rightTrianglePaths.flatten.distinct,
+        "upTriangle" -> upTrianglePaths.flatten.distinct,
+        "downTriangle" -> downTrianglePaths.flatten.distinct,
         "plus" -> plusPaths.flatten.distinct,
         "cross" -> crossPaths.flatten.distinct
       )
@@ -133,7 +161,10 @@ object MarkerDetection {
         markerCurveDictionary.getOrElse("square", List.empty[SVGPathCurve]) ++
         markerCurveDictionary.getOrElse("diamond", List.empty[SVGPathCurve]) ++
         markerCurveDictionary.getOrElse("star", List.empty[SVGPathCurve]) ++
-        markerCurveDictionary.getOrElse("triangle", List.empty[SVGPathCurve]) ++
+        markerCurveDictionary.getOrElse("leftTriangle", List.empty[SVGPathCurve]) ++
+        markerCurveDictionary.getOrElse("rightTriangle", List.empty[SVGPathCurve]) ++
+        markerCurveDictionary.getOrElse("upTriangle", List.empty[SVGPathCurve]) ++
+        markerCurveDictionary.getOrElse("downTriangle", List.empty[SVGPathCurve]) ++
         markerCurveDictionary.getOrElse("plus", List.empty[SVGPathCurve]) ++
         markerCurveDictionary.getOrElse("cross", List.empty[SVGPathCurve])
       ))
@@ -215,7 +246,7 @@ object MarkerDetection {
         //val loc="src/test/resources/10.1.1.159.7551-Figure-6.svg"
         //"src/test/resources/10.1.1.160.6544-Figure-4.svg"
         //  "src/test/resources/10.1.1.152.1889-Figure-4.svg"
-        "../linegraphproducer/data/1/1-sps.svg"
+        "../linegraphproducer/data/54/54-sps.svg"
       )
     MarkerDetection(loc, createImages = true)
 
